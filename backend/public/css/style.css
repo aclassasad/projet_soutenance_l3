@@ -1,0 +1,58 @@
+/* Fond général gris/blanc sale */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #b0b3b7; /* arrière-plan plus sombre */
+  margin: 0;
+  padding: 0;
+}
+
+/* Sidebar */
+.sidebar {
+  min-width: 250px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+.sidebar .nav-link.active {
+  background-color: rgba(7, 15, 245, 0.968);
+  border-radius: 5px;
+}
+
+/* Contenu principal */
+.content {
+  background-color: #fdfdfd; /* plus blanc que le fond */
+  border-radius: 8px;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+/* Style global pour toutes les sections/div */
+.section-box {
+  background-color: #ffffff; /* blanc pur pour contraster */
+  border: 1px solid #dcdcdc; /* contour gris clair */
+  border-radius: 10px;       /* coins arrondis */
+  padding: 20px;
+  margin-bottom: 20px;       /* espace entre les sections */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08); /* ombre légère */
+}
+
+/* Cartes */
+.card {
+  border: none;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+.card h6 {
+  font-weight: 600;
+  color: #6c757d;
+}
+.card h4 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #343a40;
+}
