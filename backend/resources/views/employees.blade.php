@@ -5,17 +5,40 @@
 @section('content')
 <h5>Employee Management</h5>
 
+<!-- Bouton Ajouter -->
+
+
+<a href="{{ route('users.index') }}" class="btn btn-primary mb-3">
+    👥 Gérer les employés
+</a>
+
 <!-- Stats -->
 <div class="row my-4">
-  <div class="col-md-3"><div class="card text-center"><div class="card-body">
-    <h6>Total Employees</h6><h4>{{ $stats['total'] }}</h4>
-  </div></div></div>
-  <div class="col-md-3"><div class="card text-center"><div class="card-body">
-    <h6>Active Today</h6><h4>{{ $stats['actifs'] }}</h4>
-  </div></div></div>
-  <div class="col-md-3"><div class="card text-center"><div class="card-body">
-    <h6>On Leave</h6><h4>{{ $stats['conges'] }}</h4>
-  </div></div></div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h6>Total Employés</h6>
+        <!-- ✅ admins exclus -->
+        <h4>{{ $stats['total'] }}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h6>Active Today</h6>
+        <h4>{{ $stats['actifs'] }}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h6>On Leave</h6>
+        <h4>{{ $stats['conges'] }}</h4>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Employee List -->
@@ -25,11 +48,11 @@
       <div class="card mb-3"><div class="card-body">
         <h6>{{ $emp->name }}
           <span class="badge 
-            @if($emp->role === 'ADMIN') bg-danger 
-            @elseif($emp->role === 'MANAGER') bg-warning 
+            @if($emp->role === 'admin') bg-danger 
+            @elseif($emp->role === 'gerant') bg-warning 
             @else bg-info 
             @endif">
-            {{ $emp->role }}
+            {{ strtoupper($emp->role) }}
           </span>
         </h6>
         <p>Status: {{ $emp->statut == 1 ? 'Active' : 'On Leave' }}</p>

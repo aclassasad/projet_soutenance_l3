@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app()->getLocale() }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- essentiel pour mobile -->
@@ -14,9 +14,9 @@
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
-<body>
-<div class="d-flex">
+<body class="{{ session('settings.theme', 'light') }}">
 
+<div class="d-flex">
   <!-- Sidebar -->
   <div id="sidebarMenu" class="sidebar bg-dark text-white p-3 d-flex flex-column vh-100 position-fixed" style="width:240px;">
     <h4 class="mb-4">SecureStore Pro</h4>
@@ -50,7 +50,7 @@
       </li>
     </ul>
 
-    <!-- Bloc en bas (notifications, paramètres, déconnexion) -->
+    <!-- Bloc en bas -->
     <div class="mt-auto">
       <a href="{{ route('notifications') }}" class="text-white d-block mb-2 text-decoration-none">
         <i class="bi bi-bell"></i> Notifications
@@ -77,7 +77,19 @@
 <!-- Bootstrap JS -->
 <script src="{{ asset('bootstrap-5.3.3-dist/js/bootstrap.bundle.js') }}"></script>
 
-<!-- Scripts poussés depuis les vues -->
+<!-- Script pour appliquer thème/langue -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Appliquer le thème
+    const theme = "{{ session('settings.theme', 'light') }}";
+    document.body.className = theme;
+
+    // Appliquer la langue
+    const lang = "{{ session('settings.language', 'fr') }}";
+    document.documentElement.lang = lang;
+  });
+</script>
+
 @stack('scripts')
 </body>
 </html>

@@ -9,14 +9,14 @@ class Vente extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['date_vente', 'total', 'user_id'];
+    protected $fillable = ['date_vente', 'user_id', 'total'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function lignesVente()
+    public function lignes()
     {
         return $this->hasMany(LigneVente::class);
     }

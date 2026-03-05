@@ -15,6 +15,9 @@ use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\VenteController;
 use App\Http\Controllers\LigneVenteController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\CaissierController;
+use App\Http\Controllers\AuthController;
+
 
 // Tableau de bord
 Route::get('/', [DashboardController::class, 'index'])->name('home');
@@ -44,7 +47,9 @@ Route::post('/settings/security', [SettingsController::class, 'security'])->name
 // CRUD Ressources
 Route::resource('users', UserController::class);
 Route::resource('produits', ProduitController::class);
-Route::resource('categories', CategorieController::class);
+Route::resource('categories', CategorieController::class)
+     ->parameters(['categories' => 'categorie']);
+
 Route::resource('fournisseurs', FournisseurController::class);
 Route::resource('ventes', VenteController::class);
 Route::resource('ligneventes', LigneVenteController::class);
@@ -58,3 +63,39 @@ Route::post('/logout', function () {
 
 Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory');
 Route::get('/inventory/search', [InventoryController::class, 'search'])->name('inventory.search');
+
+
+
+
+
+
+    
+    Route::get('/caissier', [CaissierController::class, 'dashboard'])->name('caissier.dashboard');
+Route::get('/caissier/recherche', [CaissierController::class, 'recherche'])->name('caissier.recherche');
+Route::post('/caissier/vente', [CaissierController::class, 'store'])->name('caissier.store');
+Route::get('/caissier/vente/{id}/pdf', [CaissierController::class, 'pdf'])->name('caissier.pdf');
+
+Route::get('/ventes', [CaissierController::class, 'index'])->name('ventes.index');
+Route::get('/caissier/stock', [CaissierController::class, 'stock'])->name('caissier.stock');
+Route::get('/caissier/stats', [CaissierController::class, 'stats'])->name('caissier.stats');
+
+
+
+
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+
+Route::get('/password/reset', function () {
+    return view('auth.passwords.email'); // tu crées cette vue
+})->name('password.request');
+
+
+
+
+use App\Http\Controllers\EmployeeAuthController;
+
+Route::get('/employee/login', [EmployeeAuthController::class, 'showLoginForm'])->name('employee.login');
+Route::post('/employee/login', [EmployeeAuthController::class, 'login'])->name('employee.login.post');

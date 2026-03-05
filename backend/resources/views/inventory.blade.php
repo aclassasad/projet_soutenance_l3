@@ -41,7 +41,7 @@
   </div>
 </div>
 
-<!-- Search + Filter + Add Product -->
+<!-- Search + Filter + Gestionnaire -->
 <div class="d-flex justify-content-between mb-3">
   <div class="d-flex w-75 gap-2">
     <input type="text" id="searchInput" class="form-control w-50" placeholder="Search products by name...">
@@ -54,7 +54,17 @@
     </select>
   </div>
 
-  <a href="{{ route('produits.create') }}" class="btn btn-success">+ Add Product</a>
+  <!-- ✅ Nouveau bouton Mon gestionnaire -->
+  <div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" id="gestionnaireMenu" data-bs-toggle="dropdown" aria-expanded="false">
+      Mon gestionnaire
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="gestionnaireMenu">
+      <li><a class="dropdown-item" href="{{ route('produits.index') }}">Produits</a></li>
+      <li><a class="dropdown-item" href="{{ route('categories.index') }}">Catégories</a></li>
+      <li><a class="dropdown-item" href="{{ route('fournisseurs.index') }}">Fournisseurs</a></li>
+    </ul>
+  </div>
 </div>
 
 <!-- Product Table -->

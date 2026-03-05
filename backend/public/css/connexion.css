@@ -1,0 +1,202 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #fff;
+    width: 100%;
+}
+
+/* Partie gauche */
+.gauche {
+    background: linear-gradient(135deg, #1e3a8a, #1c4d91);
+    color: white;
+    padding: 40px 30px;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    text-align: center;
+    border-bottom-right-radius: 300px;
+    border-top-right-radius: 300px;
+    margin-left: -90px;
+    margin-top: 75px;
+    height: 70vh;
+}
+
+.gauche p {
+    margin-left: 45px;
+}
+
+.social-icons a {
+    color: #fff;
+    margin-left: 20px;
+    margin-right: 50px;
+    font-size: 30px;
+}
+
+.desktop {
+    position: absolute;
+    top: 0px;
+    left: 20px;
+    width: 80px;
+}
+
+.illustration img {
+    width: 150px;
+    margin-bottom: 20px;
+    margin-top: 80px;
+    border-radius: 70%;
+}
+
+/* Partie droite */
+.droite {
+    padding: 40px 30px;
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border: 1px solid #e9088b;
+    margin-left: 50px;
+}
+
+.mobilel {
+    display: none;
+}
+
+.droite h2 {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.droite p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+form input {
+    background-color: #c4bfbf;
+    font-size: 14px;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #0F0147;
+    border-radius: 10px;
+    width: 85%;
+    color: #333;
+    box-shadow: 0px 4px 0px rgba(0,0,0,0.2);
+}
+
+form input::placeholder {
+    color: rgb(78, 74, 74);
+}
+
+.forgot-password {
+    font-size: 12px;
+    color: #1e40af;
+    text-decoration: none;
+    margin-bottom: 20px;
+    text-align: right;
+    align-self: flex-end;
+}
+
+.connexion-button {
+    font-size: 16px;
+    color: white;
+    background: linear-gradient(45deg, #ff4b2b, #1f023a);
+    border: none;
+    padding: 12px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    width: 90%;
+}
+
+.connexion-button:hover {
+    background: linear-gradient(45deg, #1f023a, #ff4b2b);
+}
+
+.enregistre {
+    font-size: 14px;
+    color: #666;
+    margin-top: 20px;
+}
+
+.enregistre a {
+    color: #1e40af;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .desktop {
+        display: none;
+    }
+
+    .gauche {
+        display: none;
+    }
+
+    .droite {
+        background-color: #0F0147;
+        width: 100%;
+        border: none;
+        height: 100%;
+        margin-left: -39px;
+    }
+
+    .droite .ouais {
+        display: none;
+    }
+    
+    .wow {
+        background-color: white;
+        border: 10px solid white;
+        border-top-right-radius: 20px;
+        border-top-left-radius: 20px;
+        width: 115%;
+        margin-top: 50px;
+    }
+
+    .mobilel {
+        display: block;
+        width: 200px;
+        margin-bottom: 20px;
+        cursor: pointer;
+    }
+
+    form input {
+        margin-left: 60px;
+        width: 75%;
+    }
+
+    form label {
+        margin-left: 60px;
+    }
+
+    .connexion-button {
+        margin-left: 60px;
+        width: 80%;
+    }
+}

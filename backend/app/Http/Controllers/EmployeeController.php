@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;   // ✅ namespace obligatoire
+namespace App\Http\Controllers;
+
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -8,20 +9,25 @@ class EmployeeController extends Controller
 {
     public function index()
     {
-        $stats = [
-            'total'  => User::count(),
-            'actifs' => User::where('statut', 1)->count(),
-            'conges' => User::where('statut', 0)->count(),
-            // ❌ supprime la ligne shifts si tu n’as pas de table shifts
-        ];
-
+        // On récupère tous les utilisateurs
         $employees = User::select('id','name','email','role','statut')->get();
 
-        // ✅ Ajout pour le graphique des rôles
+        $stats = [
+            // ✅ total employés (hors admin)
+            'total'     => $employees->whereIn('role', ['gerant','caissier'])->count(),
+            'actifs' => $employees->where('statut', 1)
+                      ->whereIn('role', ['gerant','caissier'])
+                      ->count(),            'conges'    => $employees->where('statut', 0)->count(),
+            'admins'    => $employees->where('role', 'admin')->count(),
+            'gerants'   => $employees->where('role', 'gerant')->count(),
+            'caissiers' => $employees->where('role', 'caissier')->count(),
+        ];
+
         $roles = User::select('role', DB::raw('COUNT(*) as count'))
                      ->groupBy('role')
                      ->get();
 
+        // ✅ on passe bien $employees à la vue
         return view('employees', compact('stats', 'employees', 'roles'));
     }
 }

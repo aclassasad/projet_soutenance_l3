@@ -15,10 +15,13 @@ class ProduitController extends Controller
     }
 
     // Formulaire de création
-    public function create()
-    {
-        return view('produits.create');
-    }
+   public function create()
+{
+    $categories = \App\Models\Categorie::all();
+    $fournisseurs = \App\Models\Fournisseur::all();
+
+    return view('produits.create', compact('categories', 'fournisseurs'));
+}
 
     // Sauvegarder un nouveau produit
     public function store(Request $request)
@@ -34,10 +37,13 @@ class ProduitController extends Controller
     }
 
     // Formulaire d’édition
-    public function edit(Produit $produit)
-    {
-        return view('produits.edit', compact('produit'));
-    }
+   public function edit(Produit $produit)
+{
+    $categories = \App\Models\Categorie::all();
+    $fournisseurs = \App\Models\Fournisseur::all();
+
+    return view('produits.edit', compact('produit', 'categories', 'fournisseurs'));
+}
 
     // Mettre à jour un produit
     public function update(Request $request, Produit $produit)

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Vente;
 use App\Models\LigneVente;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class VenteController extends Controller
 {
@@ -12,7 +14,7 @@ class VenteController extends Controller
     public function index()
     {
         $ventes = Vente::with('lignesVente')->get();
-        return view('ventes.index', compact('ventes'));
+        return view('ventes.create', compact('ventes'));
     }
 
     // Formulaire de création
@@ -52,10 +54,11 @@ class VenteController extends Controller
 
     // Afficher une vente
     public function show(Vente $vente)
-    {
-        $vente->load('lignesVente');
-        return view('ventes.show', compact('vente'));
-    }
+{
+    $vente->load('lignesVente.produit');
+    $pdf = Pdf::loadView('ventes.receipt_pdf', compact('vente'));
+    return $pdf->stream('recu_vente_'.$vente->id.'.pdf');
+}
 
     // Formulaire d’édition
     public function edit(Vente $vente)
@@ -93,4 +96,9 @@ class VenteController extends Controller
 
         return redirect()->route('ventes.index')->with('success', 'Vente supprimée.');
     }
+
+
+
+
+
 }
