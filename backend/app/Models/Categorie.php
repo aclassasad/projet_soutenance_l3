@@ -10,7 +10,7 @@ class Categorie extends Model
     use HasFactory;
 
     protected $fillable = ['nom', 'description'];
-
+    protected $primaryKey = 'id'; // clé primaire par défaut
     public function produits()
     {
         return $this->hasMany(Produit::class);

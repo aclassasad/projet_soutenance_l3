@@ -5,6 +5,9 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Pagination\Paginator; 
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Session;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
     {
        Schema::defaultStringLength(191);
        Paginator::useBootstrapFive();
+       $locale = Session::get('settings.language', config('app.locale'));
+    App::setLocale($locale);
 
     }
 }
+
+
+
+

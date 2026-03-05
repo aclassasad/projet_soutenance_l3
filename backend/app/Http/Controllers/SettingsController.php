@@ -3,16 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 
 class SettingsController extends Controller
 {
     public function index()
     {
-        // Charger les paramètres depuis la session, ou valeurs par défaut
+        // Charger les paramètres depuis la session
         $settings = session('settings', [
             'language' => 'fr',
-            'theme' => 'light',
+            'theme'    => 'light',
         ]);
+
+        // ✅ appliquer la langue immédiatement
+        App::setLocale($settings['language']);
 
         return view('settings', compact('settings'));
     }
@@ -23,22 +27,13 @@ class SettingsController extends Controller
         session([
             'settings' => [
                 'language' => $request->input('language'),
-                'theme' => $request->input('theme'),
+                'theme'    => $request->input('theme'),
             ]
         ]);
+
+        // ✅ appliquer la langue immédiatement
+        App::setLocale($request->input('language'));
 
         return redirect()->route('settings')->with('success', 'Paramètres mis à jour.');
-    }
-
-    public function security(Request $request)
-    {
-        // Exemple : paramètres de sécurité en session
-        session([
-            'security' => [
-                'two_factor' => $request->input('two_factor', false),
-            ]
-        ]);
-
-        return redirect()->route('settings')->with('success', 'Paramètres de sécurité mis à jour.');
     }
 }

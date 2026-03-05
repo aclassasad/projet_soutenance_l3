@@ -79,7 +79,23 @@
             </select>
         </div>
 
-        <a href="{{ route('produits.create') }}" class="btn btn-success">+ Add Product</a>
+          <!-- ✅ Nouveau bouton Mon gestionnaire -->
+  <div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" id="gestionnaireMenu" data-bs-toggle="dropdown" aria-expanded="false">
+      Mon gestionnaire
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="gestionnaireMenu">
+      <li><a class="dropdown-item" href="{{ route('produits.index') }}">Produits</a></li>
+      <li><a class="dropdown-item" href="{{ route('categories.index') }}">Catégories</a></li>
+      <li><a class="dropdown-item" href="{{ route('fournisseurs.index') }}">Fournisseurs</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- Product Table -->
+<div id="inventoryTable">
+  @include('partials.inventory_table', ['produits' => $produits])
+
     </div>
 
     <!-- Product Table avec style maquette -->
