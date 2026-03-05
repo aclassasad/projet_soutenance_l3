@@ -16,6 +16,8 @@
 </head>
 <body>
 <div class="d-flex">
+<!--Font Awesome pour les icônes-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <!-- Sidebar -->
   <div id="sidebarMenu" class="sidebar bg-dark text-white p-3 d-flex flex-column vh-100 position-fixed" style="width:240px;">
