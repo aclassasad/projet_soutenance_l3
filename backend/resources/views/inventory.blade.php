@@ -79,23 +79,17 @@
             </select>
         </div>
 
-          <!-- ✅ Nouveau bouton Mon gestionnaire -->
-  <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" id="gestionnaireMenu" data-bs-toggle="dropdown" aria-expanded="false">
-      Mon gestionnaire
-    </button>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="gestionnaireMenu">
-      <li><a class="dropdown-item" href="{{ route('produits.index') }}">Produits</a></li>
-      <li><a class="dropdown-item" href="{{ route('categories.index') }}">Catégories</a></li>
-      <li><a class="dropdown-item" href="{{ route('fournisseurs.index') }}">Fournisseurs</a></li>
-    </ul>
-  </div>
-</div>
-
-<!-- Product Table -->
-<div id="inventoryTable">
-  @include('partials.inventory_table', ['produits' => $produits])
-
+        <!-- ✅ Nouveau bouton Mon gestionnaire -->
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="gestionnaireMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                Mon gestionnaire
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="gestionnaireMenu">
+                <li><a class="dropdown-item" href="{{ route('produits.index') }}">Produits</a></li>
+                <li><a class="dropdown-item" href="{{ route('categories.index') }}">Catégories</a></li>
+                <li><a class="dropdown-item" href="{{ route('fournisseurs.index') }}">Fournisseurs</a></li>
+            </ul>
+        </div>
     </div>
 
     <!-- Product Table avec style maquette -->
@@ -122,6 +116,13 @@
             </div>
         </div>
     </div>
+
+    <!-- Pagination -->
+    @if(method_exists($produits, 'links'))
+    <div class="d-flex justify-content-end mt-3 px-3" id="paginationContainer">
+        {{ $produits->links() }}
+    </div>
+    @endif
 </div>
 @endsection
 
@@ -131,15 +132,63 @@ function loadInventory() {
     let query = document.getElementById('searchInput').value;
     let category = document.getElementById('categoryFilter').value;
 
-    fetch("{{ route('inventory.search') }}?search=" + query + "&categorie_id=" + category)
+    fetch("{{ route('inventory.search') }}?search=" + encodeURIComponent(query) + "&categorie_id=" + encodeURIComponent(category))
         .then(response => response.text())
         .then(html => {
+            // Remplacer uniquement le contenu du tbody
             document.getElementById('inventoryTable').innerHTML = html;
+            
+            // Cacher la pagination pendant la recherche
+            const pagination = document.getElementById('paginationContainer');
+            if (pagination) {
+                if (query.trim() !== '' || category !== '') {
+                    pagination.style.display = 'none';
+                } else {
+                    pagination.style.display = 'flex';
+                }
+            }
         })
         .catch(error => console.error('Erreur AJAX:', error));
 }
 
-document.getElementById('searchInput').addEventListener('keyup', loadInventory);
-document.getElementById('categoryFilter').addEventListener('change', loadInventory);
+function deleteProduct(id) {
+    if(confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+        // À implémenter avec une requête AJAX ou un formulaire
+        console.log('Delete product ' + id);
+        
+        // Exemple avec fetch pour une suppression AJAX
+        fetch(`/produits/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                // Recharger la liste après suppression
+                loadInventory();
+            } else {
+                alert('Erreur lors de la suppression');
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+    }
+}
+
+// Initialisation des événements
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', loadInventory);
+    }
+    
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', loadInventory);
+    }
+});
 </script>
 @endpush

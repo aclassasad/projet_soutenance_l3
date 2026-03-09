@@ -13,7 +13,54 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <!-- toastr pour les Notifications-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+  <!--<script>
+    (function() {
+        // Appliquer le thème immédiatement pour éviter le flash
+        const theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            document.body.classList.add('dark-mode');
+        }
+    })();
+</script>-->
+@stack('styles')
+<!-- Styles pour le dark mode -->
+<style>
+    body.dark-mode {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+    }
+    body.dark-mode .card,
+    body.dark-mode .navbar,
+    body.dark-mode .sidebar,
+    body.dark-mode .modal-content,
+    body.dark-mode .dropdown-menu {
+        background-color: #2d2d2d !important;
+        border-color: #404040 !important;
+    }
+    body.dark-mode .table {
+        color: #e0e0e0 !important;
+    }
+    body.dark-mode .text-muted {
+        color: #a0a0a0 !important;
+    }
+    /* Ajoutez d'autres sélecteurs selon les besoins */
+</style>
+
+<!-- Script pour appliquer le thème avant affichage -->
+<script>
+    (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+            document.body.classList.add('dark-mode');
+        }
+    })();
+</script>
 </head>
+
 <body>
 <div >
 <!--Font Awesome pour les icônes-->
@@ -80,6 +127,34 @@
 <!-- Bootstrap JS -->
 <script src="{{ asset('bootstrap-5.3.3-dist/js/bootstrap.bundle.js') }}"></script>
 
+<!-- Toast Js -->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+@if(Session::has('success'))
+<script>
+toastr.success("{{ Session::get('success') }}");
+</script>
+@endif
+
+@if(Session::has('error'))
+<script>
+toastr.error("{{ Session::get('error') }}");
+</script>
+@endif
+
+@if(Session::has('info'))
+<script>
+toastr.info("{{ Session::get('info') }}");
+</script>
+@endif
+
+@if(Session::has('warning'))
+<script>
+toastr.warning("{{ Session::get('warning') }}");
+</script>
+@endif
+
+
 <!-- Script pour appliquer thème/langue -->
 <script>
   document.addEventListener("DOMContentLoaded", function() {
@@ -93,6 +168,9 @@
   });
 </script>
 
+
+
 @stack('scripts')
+
 </body>
 </html>

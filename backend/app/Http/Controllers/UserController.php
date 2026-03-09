@@ -37,26 +37,31 @@ class UserController extends Controller
     }
 
     // Sauvegarder un nouvel utilisateur
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'role' => 'required|in:admin,caissier,gerant',
-            'statut' => 'boolean'
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:6',
+        'role' => 'required|in:admin,caissier,gerant',
+        'statut' => 'boolean'
+    ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'statut' => $request->statut ?? true,
-        ]);
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'role' => $request->role,
+        'statut' => $request->statut ?? true,
+    ]);
 
-        return redirect()->route('users.index')->with('success', 'Employé créé avec succès.');
+    // ✅ AJOUTER CES 3 LIGNES
+    if ($request->ajax()) {
+        return response()->json(['success' => true, 'message' => 'Employé créé avec succès.']);
     }
+
+    return redirect()->route('users.index')->with('success', 'Employé créé avec succès.');
+}
 
     // Afficher un utilisateur
     public function show(User $user)

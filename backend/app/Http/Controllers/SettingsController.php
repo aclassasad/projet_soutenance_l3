@@ -21,19 +21,23 @@ class SettingsController extends Controller
         return view('settings', compact('settings'));
     }
 
-    public function update(Request $request)
-    {
-        // Sauvegarder les paramètres en session
-        session([
-            'settings' => [
-                'language' => $request->input('language'),
-                'theme'    => $request->input('theme'),
-            ]
-        ]);
-
-        // ✅ appliquer la langue immédiatement
-        App::setLocale($request->input('language'));
-
-        return redirect()->route('settings')->with('success', 'Paramètres mis à jour.');
+public function update(Request $request)
+{
+    // Sauvegarde du thème pour l'utilisateur (si vous avez une colonne 'theme' dans users)
+    if (auth()->check()) {
+        $user = auth()->user();
+        $user->theme = $request->theme;
+        $user->save();
     }
+
+    // Change la langue en session
+    if ($request->has('language')) {
+        session(['locale' => $request->language]);
+    }
+
+    // Optionnel : thème aussi en session si pas de base de données
+    session(['theme' => $request->theme]);
+
+    return redirect()->back()->with('success', 'Paramètres mis à jour.');
+}
 }
