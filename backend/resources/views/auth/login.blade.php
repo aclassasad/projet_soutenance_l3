@@ -10,30 +10,26 @@
 </head>
 <body>
     <div class="logo">
-        <a href="{{ route('dashboard') }}"><img src="{{ asset('images/logo-o1.png') }}" alt="Logo" class="desktop"></a>
+        <a href="{{ route('dashboard') }}"><img src="{{ asset('images/logo.jpeg') }}" alt="Logo" class="desktop"></a>
     </div>
 
     <div class="gauche">
-        <center>
-            <div class="illustration">
-                <img src="{{ asset('images/cristal.jpg') }}" alt="Illustration">
-            </div>
-            <h2>Lorem ipsum dolor sit</h2>
-            <p>Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit</p>
+        
+        
             <div class="social-icons">
                 <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
                 <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
                 <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
                 <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
             </div>
-        </center>
+        
     </div>
 
     <div class="droite">
         <a href="{{ route('dashboard') }}"><img src="{{ asset('images/logo-bp1.png') }}" alt="Logo" class="mobilel"></a>
         <div class="wow">
             <h2>CONNEXION</h2>
-            <p class="ouais">Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+            <p class="ouais">Veuillez entrer vos identifiants afin accrder à votre dashboard.</p>
 
             <form method="POST" action="{{ route('login.post') }}">
                 @csrf
@@ -51,7 +47,6 @@
 
                 <button type="submit" class="connexion-button">Connexion</button>
 
-                <p class="enregistre">Vous n'avez pas de compte ? <br>Inscrivez-vous</p>
             </form>
         </div>
     </div>

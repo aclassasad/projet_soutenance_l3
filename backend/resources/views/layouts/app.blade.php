@@ -22,7 +22,7 @@
 <div class="d-flex">
   <!-- Sidebar -->
   <div id="sidebarMenu" class="sidebar bg-dark text-white p-3 d-flex flex-column vh-100 position-fixed" style="width:240px;">
-    <h4 class="mb-4">SecureStore Pro</h4>
+    <h4 class="mb-4">  <a class="navbar-brand" href="{{ route('dashboard') }}"> SecureStore Pro</a></h4>
 
     <!-- Navigation principale -->
     <ul class="nav flex-column mb-auto">
