@@ -13,8 +13,8 @@ class VenteController extends Controller
     // Afficher la liste des ventes
     public function index()
     {
-        $ventes = Vente::with('lignesVente')->get();
-        return view('ventes.create', compact('ventes'));
+        $ventes = Vente::with('lignes')->get();
+        return view('caissier.historique', compact('ventes'));
     }
 
     // Formulaire de création
@@ -55,15 +55,15 @@ class VenteController extends Controller
     // Afficher une vente
     public function show(Vente $vente)
 {
-    $vente->load('lignesVente.produit');
-    $pdf = Pdf::loadView('ventes.receipt_pdf', compact('vente'));
+    $vente->load('lignes.produit');
+    $pdf = Pdf::loadView('caissier.recu', compact('vente'));
     return $pdf->stream('recu_vente_'.$vente->id.'.pdf');
 }
 
     // Formulaire d’édition
     public function edit(Vente $vente)
     {
-        $vente->load('lignesVente');
+        $vente->load('lignes');
         return view('ventes.edit', compact('vente'));
     }
 

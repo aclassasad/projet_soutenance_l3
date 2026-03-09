@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Hash;
+
 
 class AuthController extends Controller
 {
@@ -11,23 +14,36 @@ class AuthController extends Controller
     {
         return view('auth.login');
     }
+public function login(Request $request)
+{
+    $credentials = $request->validate([
+        'email'    => ['required', 'email'],
+        'password' => ['required'],
+    ]);
 
-    public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email'    => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+    if (Auth::attempt($credentials)) {
+        $request->session()->regenerate();
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended('dashboard'); // ✅ accès au dashboard
+        $user = Auth::user();
+
+        // Redirection selon rôle
+        if ($user->role === 'admin' || $user->role === 'gerant') {
+            return redirect()->route('dashboard');
+        } elseif ($user->role === 'caissier') {
+            return redirect()->route('caissier.dashboard');
         }
 
-        return back()->withErrors([
-            'email' => 'Les identifiants sont incorrects.',
-        ])->onlyInput('email');
+        // Rôle inconnu → déconnexion
+        Auth::logout();
+        return redirect()->route('login')->withErrors([
+            'email' => 'Votre rôle n’est pas autorisé.',
+        ]);
     }
+
+    return back()->withErrors([
+        'email' => 'Identifiants incorrects.',
+    ])->onlyInput('email');
+}
 
     public function logout(Request $request)
     {
@@ -37,4 +53,7 @@ class AuthController extends Controller
 
         return redirect('/login');
     }
+
+
+
 }
