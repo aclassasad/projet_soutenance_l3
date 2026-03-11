@@ -39,43 +39,66 @@ class UserController extends Controller
     }
 
     // Sauvegarder un nouvel utilisateur
- 
-public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required',
-        'email' => 'required|email|unique:users',
-        'password' => [
-            'required',
-            'string',
-            'min:8',
-            'regex:/[A-Z]/',
-            'regex:/[a-z]/',
-            'regex:/[0-9]/',
-            'regex:/[@$!%*?&]/'
-        ],
-        'password_confirmation' => 'required|same:password',
-        'role' => 'required|in:admin,caissier,gerant',
-        'statut' => 'boolean'
-    ], [
-        'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial.',
-        'password_confirmation.same' => 'La confirmation du mot de passe ne correspond pas.'
-    ]);
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/[A-Z]/',
+                'regex:/[a-z]/',
+                'regex:/[0-9]/',
+                'regex:/[@$!%*?&]/'
+            ],
+            'password_confirmation' => 'required|same:password',
+            'role' => 'required|in:admin,caissier,gerant',
+            'statut' => 'boolean'
+        ], [
+            'password.regex' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial.',
+            'password_confirmation.same' => 'La confirmation du mot de passe ne correspond pas.'
+        ]);
 
-    // Création de l'utilisateur
-    $user = User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'role' => $request->role,
-        'statut' => $request->statut ?? true,
-    ]);
+        try {
+            // Création de l'utilisateur
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role,
+                'statut' => $request->statut ?? true,
+            ]);
 
-    // Envoi du mail avec ses coordonnées
-    Mail::to($user->email)->send(new UserCreatedMail($user, $request->password));
+            // Envoi du mail avec ses coordonnées
+            Mail::to($user->email)->send(new UserCreatedMail($user, $request->password));
 
-    return redirect()->route('users.index')->with('success', 'Employé créé avec succès et email envoyé.');
-}
+            // ✅ SI C'EST UNE REQUÊTE AJAX, RETOURNER DU JSON
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Employé créé avec succès et email envoyé.',
+                    'user' => $user
+                ]);
+            }
+
+            // ✅ SINON, REDIRECTION NORMALE
+            return redirect()->route('users.index')->with('success', 'Employé créé avec succès et email envoyé.');
+
+        } catch (\Exception $e) {
+            // ✅ GESTION DES ERREURS
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erreur lors de la création : ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()->with('error', 'Erreur lors de la création.');
+        }
+    }
+
     // Afficher un utilisateur
     public function show(User $user)
     {
@@ -105,13 +128,28 @@ public function store(Request $request)
             'statut' => $request->statut,
         ]);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Employé mis à jour.'
+            ]);
+        }
+
         return redirect()->route('users.index')->with('success', 'Employé mis à jour.');
     }
 
     // Supprimer un utilisateur
-    public function destroy(User $user)
+    public function destroy(Request $request, User $user)
     {
         $user->delete();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Employé supprimé.'
+            ]);
+        }
+
         return redirect()->route('users.index')->with('success', 'Employé supprimé.');
     }
 }

@@ -165,7 +165,7 @@
                             <small class="text-muted">{{ $t->created_at->format('d/m/Y H:i') }}</small>
                         </div>
                         <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#venteModal{{ $t->id }}">
-                            Voir détails
+                            <i class="fa-solid fa-eye"></i>
                         </button>
                     </li>
                     @endforeach
