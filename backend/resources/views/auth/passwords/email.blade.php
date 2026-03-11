@@ -5,6 +5,11 @@
 <form method="POST" action="{{ route('password.sendCode') }}">
     @csrf
     <input type="email" name="email" class="form-control mb-3" required>
+
+    @error('email')
+        <div class="text-danger small">{{ $message }}</div>
+    @enderror
+
     <button type="submit" class="btn btn-primary w-100">Envoyer le code</button>
 </form>
 @endsection

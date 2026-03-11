@@ -56,3 +56,9 @@ body {
   font-weight: bold;
   color: #343a40;
 }
+
+.list-group-item:hover,
+.card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}

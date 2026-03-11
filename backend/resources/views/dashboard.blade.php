@@ -152,19 +152,57 @@
                 </div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
-                        @foreach($stats['transactions_recentes'] ?? [] as $t)
-                        <li class="list-group-item d-flex align-items-center gap-3 px-0">
-                            <i class="fa-solid fa-circle text-primary" style="font-size: 8px;"></i>
-                            <div class="d-flex justify-content-between w-100">
-                                <div>
-                                    <p class="mb-0"><span class="fw-semibold">Sale Transaction</span> • John Doe</p>
-                                    <small class="text-muted">${{ number_format($t['total'], 2) }}</small>
-                                </div>
-                                <small class="text-muted">{{ $t['created_at'] ?? '2 min ago' }}</small>
+                    @foreach($stats['transactions_recentes'] ?? [] as $t)
+                    <li class="list-group-item d-flex align-items-center gap-3 px-0">
+                        <i class="fa-solid fa-circle text-primary" style="font-size: 8px;"></i>
+                        <div class="d-flex justify-content-between w-100">
+                            <div>
+                                <p class="mb-0">
+                                    <span class="fw-semibold">Sale Transaction</span> • {{ $t->user->name }}
+                                </p>
+                                <small class="text-muted">${{ number_format($t->total, 2) }}</small>
                             </div>
-                        </li>
-                        @endforeach
+                            <small class="text-muted">{{ $t->created_at->format('d/m/Y H:i') }}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#venteModal{{ $t->id }}">
+                            Voir détails
+                        </button>
+                    </li>
+                    @endforeach
                     </ul>
+                                            @foreach($stats['transactions_recentes'] ?? [] as $t)
+                        <div class="modal " id="venteModal{{ $t->id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Détails de la vente #{{ $t->id }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Caissier :</strong> {{ $t->user->name }}</p>
+                                <p><strong>Date :</strong> {{ $t->created_at->format('d/m/Y H:i') }}</p>
+                                <p><strong>Total :</strong> ${{ number_format($t->total, 2) }}</p>
+
+                                <h6>Produits :</h6>
+                                <ul>
+                                @foreach($t->lignes as $ligne)
+    <li>
+        {{ $ligne->produit?->nom ?? 'Produit inconnu' }} — 
+        {{ $ligne->quantite }} x {{ $ligne->prix_unitaire }} = {{ $ligne->sous_total }}
+    </li>
+@endforeach
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="{{ route('ventes.download', $t->id) }}" class="btn btn-success">
+                                Télécharger PDF
+                                </a>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                        @endforeach
                 </div>
             </div>
         </div>

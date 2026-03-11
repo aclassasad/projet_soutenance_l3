@@ -102,3 +102,7 @@ use App\Http\Controllers\PasswordController;
     // Étape alternative : lien direct dans le mail
     Route::get('/password/reset/{token}', [PasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('/password/reset', [PasswordController::class, 'resetWithToken'])->name('password.update');
+
+   Route::get('/ventes/{id}/download', [VenteController::class, 'download'])
+    ->name('ventes.download');
+ 

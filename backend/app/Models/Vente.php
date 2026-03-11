@@ -12,12 +12,14 @@ class Vente extends Model
     protected $fillable = ['date_vente', 'user_id', 'total'];
 
     public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
 
     public function lignes()
     {
         return $this->hasMany(LigneVente::class);
     }
+
+ 
 }

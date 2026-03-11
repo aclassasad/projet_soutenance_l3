@@ -40,8 +40,10 @@ class DashboardController extends Controller
             'produits_alertes' => Produit::whereColumn('stock', '<=', 'seuil_alerte')->count(),
             'produits_epuises' => Produit::where('stock', 0)->count(),
             'total_commandes' => Vente::count(),
-            'transactions_recentes' => Vente::orderBy('created_at','desc')->take(5)->get()->toArray(),
-
+'transactions_recentes' => Vente::with('user') // relation vers le caissier
+    ->orderBy('created_at','desc')
+    ->take(5)
+    ->get(),
             // Graphique ventes hebdomadaires (7 jours fixes)
             'weekly_sales_labels' => $weeklySalesLabels,
             'weekly_sales_data'   => $weeklySalesData,

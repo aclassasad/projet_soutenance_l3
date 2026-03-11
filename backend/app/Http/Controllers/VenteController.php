@@ -100,5 +100,17 @@ class VenteController extends Controller
 
 
 
+// Afficher une vente en PDF (stream)
+ 
+    // Télécharger une vente en PDF
+    public function download($id)
+    {
+        $vente = Vente::with(['user','lignes.produit'])->findOrFail($id);
+
+        $pdf = Pdf::loadView('caissier.recu', compact('vente'));
+        return $pdf->download("recu_vente_{$vente->id}.pdf");
+    }
+
+
 
 }
