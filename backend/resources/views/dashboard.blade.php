@@ -3,99 +3,118 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="mx-5">
-    <h2 class="card-body fw-bold">Dashboard</h2>
-    <h6 class="text-muted">Welcome back! Here's what's happening today.</h6>
-
-    <!-- Metrics Cards -->
-    <div class="row my-4">
-        <div class="col-md-3">
-           <a href="{{ route('sales') }}" style="text-decoration: none">
-            <div class="card text-center">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div class="text-start">
-                        <h6 class="text-muted">Total Revenue</h6>
-                        <h4 class="fw-bold">${{ number_format($stats['total_revenu'] ?? 45231, 2) }}</h4>
-                        <small class="text-success">+12.5%</small>
-                    </div>
-                    <div class="bg-success bg-opacity-10 p-3 rounded-circle">
-                        <i class="fa-solid fa-dollar-sign text-success fs-3"></i>
-                    </div>
-                </div>
-                </a>
-            </div>
+<div class="container-fluid px-3 px-md-4 px-lg-5">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Dashboard</h2>
+            <h6 class="text-muted">Welcome back! Here's what's happening today.</h6>
         </div>
-          <div class="col-md-3">
-            <a href="{{ route('categories.index') }}" style="text-decoration: none">
-            <div class="card text-center">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div class="text-start">
-                        <h6 class="text-muted">Categories</h6>
-                        <h4 class="fw-bold">{{ $stats['nombre_categories'] ?? 5 }}</h4>
-                        <small class="text-warning fw-bold">⚠️ Some low stock</small>
-                    </div>
-                    <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
-                        <i class="fa-solid fa-shield-halved text-warning fs-3"></i>
-                    </div>
-                </div>
-            </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-           <a href="{{ route('produits.index') }}" style="text-decoration: none">
-            <div class="card text-center">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div class="text-start">
-                        <h6 class="text-muted">Products in Stock</h6>
-                        <h4 class="fw-bold">{{ number_format($stats['total_produits_stock'] ?? 2847) }}</h4>
-                        <small class="text-danger">-3.2%</small>
-                    </div>
-                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
-                        <i class="fa-solid fa-box text-primary fs-3"></i>
-                    </div>
-                </div>
-            </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-           <a href="{{ route('employees') }}" style="text-decoration: none">
-            <div class="card text-center">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div class="text-start">
-                        <h6 class="text-muted">Active Employees</h6>
-                        <h4 class="fw-bold">{{ $stats['employes_actifs'] ?? 24 }}</h4>
-                        <small class="text-success">+2</small>
-                    </div>
-                    <div class="bg-info bg-opacity-10 p-3 rounded-circle">
-                        <i class="fa-solid fa-users text-info fs-3"></i>
-                    </div>
-                </div>
-            </div>
-            </a>
-        </div>
-
-      
     </div>
 
-    <!-- Graphs -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-6">
+    <!-- Metrics Cards - Complètement responsives -->
+    <div class="row g-3 g-md-4 mb-4">
+        <!-- Total Revenue Card -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <a href="{{ route('sales') }}" style="text-decoration: none">
+                <div class="card border-0 shadow-sm h-100 hover-card">
+                    <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
+                        <div class="w-75 w-md-100 w-lg-75">
+                            <h6 class="text-muted small mb-1 mb-md-2">Total Revenue</h6>
+                            <h4 class="fw-bold mb-1 fs-5 fs-md-4">{{ number_format($stats['total_revenu'] ?? 45231, 0, ',', ' ') }} <small class="fs-6">FCFA</small></h4>
+                            <small class="text-success">
+                                <i class="fa-solid fa-arrow-up me-1"></i>+12.5%
+                            </small>
+                        </div> <!--
+                        <div class="bg-success bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
+                            <i class="fa-solid fa-dollar-sign text-success fs-5 fs-md-4"></i>
+                        </div> -->
+                        <div class="bg-success bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
+                        <i class="fa-solid fa-wallet text-success fs-5 fs-md-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Categories Card -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <a href="{{ route('categories.index') }}" style="text-decoration: none">
+                <div class="card border-0 shadow-sm h-100 hover-card">
+                    <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
+                        <div class="w-75 w-md-100 w-lg-75">
+                            <h6 class="text-muted small mb-1 mb-md-2">Categories</h6>
+                            <h4 class="fw-bold mb-1 fs-5 fs-md-4">{{ $stats['nombre_categories'] ?? 5 }}</h4>
+                            <small class="text-warning fw-bold">
+                                <i class="fa-solid fa-triangle-exclamation me-1"></i>Low stock
+                            </small>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
+                            <i class="fa-solid fa-shield-halved text-warning fs-5 fs-md-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Products Card -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <a href="{{ route('produits.index') }}" style="text-decoration: none">
+                <div class="card border-0 shadow-sm h-100 hover-card">
+                    <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
+                        <div class="w-75 w-md-100 w-lg-75">
+                            <h6 class="text-muted small mb-1 mb-md-2">Products in Stock</h6>
+                            <h4 class="fw-bold mb-1 fs-5 fs-md-4">{{ number_format($stats['total_produits_stock'] ?? 2847) }}</h4>
+                            <small class="text-danger">
+                                <i class="fa-solid fa-arrow-down me-1"></i>-3.2%
+                            </small>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
+                            <i class="fa-solid fa-box text-primary fs-5 fs-md-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Employees Card -->
+        <div class="col-12 col-sm-6 col-md-3">
+            <a href="{{ route('employees') }}" style="text-decoration: none">
+                <div class="card border-0 shadow-sm h-100 hover-card">
+                    <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
+                        <div class="w-75 w-md-100 w-lg-75">
+                            <h6 class="text-muted small mb-1 mb-md-2">Active Employees</h6>
+                            <h4 class="fw-bold mb-1 fs-5 fs-md-4">{{ $stats['employes_actifs'] ?? 24 }}</h4>
+                            <small class="text-success">
+                                <i class="fa-solid fa-arrow-up me-1"></i>+2
+                            </small>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
+                            <i class="fa-solid fa-users text-info fs-5 fs-md-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Graphs - Responsive -->
+    <div class="row g-3 g-md-4 mb-4">
+        <div class="col-12 col-lg-6">
             <div class="card">
                 <div class="card-body">
                     <h6 class="fw-semibold mb-3">Weekly Sales</h6>
-                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                    <div class="chart-container" style="position: relative; height: 250px; height-md: 300px; width: 100%;">
                         <canvas id="weeklySales"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-12 col-lg-6">
             <div class="card">
                 <div class="card-body">
                     <h6 class="fw-semibold mb-3">Store Traffic Today</h6>
-                    <div class="chart-container" style="position: relative; height: 300px; width: 100%;">
+                    <div class="chart-container" style="position: relative; height: 250px; height-md: 300px; width: 100%;">
                         <canvas id="storeTraffic"></canvas>
                     </div>
                 </div>
@@ -103,40 +122,40 @@
         </div>
     </div>
 
-    <!-- Recent Alerts & Activity -->
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="card">
+    <!-- Recent Alerts & Activity - Responsive -->
+    <div class="row g-3 g-md-4">
+        <div class="col-12 col-md-6">
+            <div class="card h-100">
                 <div class="card-header bg-transparent border-0">
                     <h6 class="fw-semibold mb-0">Recent Alerts</h6>
                 </div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex align-items-center gap-3 px-0">
-                            <i class="fa-solid fa-circle-exclamation text-danger"></i>
+                        <li class="list-group-item d-flex align-items-start gap-2 gap-md-3 px-0">
+                            <i class="fa-solid fa-circle-exclamation text-danger mt-1"></i>
                             <div>
-                                <p class="mb-0">Unauthorized access attempt at rear entrance</p>
+                                <p class="mb-0 small">Unauthorized access attempt at rear entrance</p>
                                 <small class="text-muted">5 min ago</small>
                             </div>
                         </li>
-                        <li class="list-group-item d-flex align-items-center gap-3 px-0">
-                            <i class="fa-solid fa-circle-exclamation text-warning"></i>
+                        <li class="list-group-item d-flex align-items-start gap-2 gap-md-3 px-0">
+                            <i class="fa-solid fa-circle-exclamation text-warning mt-1"></i>
                             <div>
-                                <p class="mb-0">Low stock alert: Product SKU-12847</p>
+                                <p class="mb-0 small">Low stock alert: Product SKU-12847</p>
                                 <small class="text-muted">12 min ago</small>
                             </div>
                         </li>
-                        <li class="list-group-item d-flex align-items-center gap-3 px-0">
-                            <i class="fa-solid fa-circle-exclamation text-danger"></i>
+                        <li class="list-group-item d-flex align-items-start gap-2 gap-md-3 px-0">
+                            <i class="fa-solid fa-circle-exclamation text-danger mt-1"></i>
                             <div>
-                                <p class="mb-0">Camera 4 offline - Aisle 7</p>
+                                <p class="mb-0 small">Camera 4 offline - Aisle 7</p>
                                 <small class="text-muted">25 min ago</small>
                             </div>
                         </li>
-                        <li class="list-group-item d-flex align-items-center gap-3 px-0">
-                            <i class="fa-solid fa-circle-check text-success"></i>
+                        <li class="list-group-item d-flex align-items-start gap-2 gap-md-3 px-0">
+                            <i class="fa-solid fa-circle-check text-success mt-1"></i>
                             <div>
-                                <p class="mb-0">Daily backup completed successfully</p>
+                                <p class="mb-0 small">Daily backup completed successfully</p>
                                 <small class="text-muted">1 hour ago</small>
                             </div>
                         </li>
@@ -145,64 +164,94 @@
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card">
+        <div class="col-12 col-md-6">
+            <div class="card h-100">
                 <div class="card-header bg-transparent border-0">
                     <h6 class="fw-semibold mb-0">Recent Activity</h6>
                 </div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
-                    @foreach($stats['transactions_recentes'] ?? [] as $t)
-                    <li class="list-group-item d-flex align-items-center gap-3 px-0">
-                        <i class="fa-solid fa-circle text-primary" style="font-size: 8px;"></i>
-                        <div class="d-flex justify-content-between w-100">
-                            <div>
-                                <p class="mb-0">
-                                    <span class="fw-semibold">Sale Transaction</span> • {{ $t->user->name }}
-                                </p>
-                                <small class="text-muted">${{ number_format($t->total, 2) }}</small>
+                        @foreach($stats['transactions_recentes'] ?? [] as $t)
+                        <li class="list-group-item d-flex align-items-start gap-2 gap-md-3 px-0">
+                            <i class="fa-solid fa-circle text-primary mt-2" style="font-size: 8px;"></i>
+                            <div class="flex-grow-1">
+                                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                                    <p class="mb-0 small">
+                                        <span class="fw-semibold">Sale Transaction</span> • {{ $t->user->name }}
+                                    </p>
+                                    <small class="text-muted">{{ $t->created_at->format('d/m/Y H:i') }}</small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <small class="text-muted">${{ number_format($t->total, 2) }}</small>
+                                    <button class="btn btn-sm btn-outline-primary py-0 px-2" data-bs-toggle="modal" data-bs-target="#venteModal{{ $t->id }}">
+                                        <i class="fa-solid fa-eye"></i> Détails
+                                    </button>
+                                </div>
                             </div>
-                            <small class="text-muted">{{ $t->created_at->format('d/m/Y H:i') }}</small>
-                        </div>
-                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#venteModal{{ $t->id }}">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
-                    </li>
-                    @endforeach
-                    </ul>
-                                            @foreach($stats['transactions_recentes'] ?? [] as $t)
-                        <div class="modal " id="venteModal{{ $t->id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Détails de la vente #{{ $t->id }}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p><strong>Caissier :</strong> {{ $t->user->name }}</p>
-                                <p><strong>Date :</strong> {{ $t->created_at->format('d/m/Y H:i') }}</p>
-                                <p><strong>Total :</strong> ${{ number_format($t->total, 2) }}</p>
-
-                                <h6>Produits :</h6>
-                                <ul>
-                                @foreach($t->lignes as $ligne)
-    <li>
-        {{ $ligne->produit?->nom ?? 'Produit inconnu' }} — 
-        {{ $ligne->quantite }} x {{ $ligne->prix_unitaire }} = {{ $ligne->sous_total }}
-    </li>
-@endforeach
-                                </ul>
-                            </div>
-                            <div class="modal-footer">
-                                <a href="{{ route('ventes.download', $t->id) }}" class="btn btn-success">
-                                Télécharger PDF
-                                </a>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                            </div>
-                            </div>
-                        </div>
-                        </div>
+                        </li>
                         @endforeach
+                    </ul>
+
+                    <!-- Modals des ventes -->
+                    @foreach($stats['transactions_recentes'] ?? [] as $t)
+                    <div class="modal fade" id="venteModal{{ $t->id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title">Détails de la vente #{{ $t->id }}</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <p class="mb-1"><strong>Caissier</strong></p>
+                                            <p>{{ $t->user->name }}</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <p class="mb-1"><strong>Date</strong></p>
+                                            <p>{{ $t->created_at->format('d/m/Y H:i') }}</p>
+                                        </div>
+                                        <div class="col-12">
+                                            <p class="mb-1"><strong>Total</strong></p>
+                                            <h4 class="text-success">${{ number_format($t->total, 2) }}</h4>
+                                        </div>
+                                        <div class="col-12">
+                                            <h6 class="fw-semibold">Produits vendus :</h6>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-hover">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Produit</th>
+                                                            <th>Qté</th>
+                                                            <th>Prix unitaire</th>
+                                                            <th>Sous-total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($t->lignes as $ligne)
+                                                        <tr>
+                                                            <td>{{ $ligne->produit?->nom ?? 'Produit inconnu' }}</td>
+                                                            <td>{{ $ligne->quantite }}</td>
+                                                            <td>${{ number_format($ligne->prix_unitaire, 2) }}</td>
+                                                            <td>${{ number_format($ligne->sous_total, 2) }}</td>
+                                                        </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="{{ route('ventes.download', $t->id) }}" class="btn btn-success">
+                                        <i class="fa-solid fa-download me-2"></i>Télécharger PDF
+                                    </a>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
@@ -250,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
         options: {
             responsive: true,
             maintainAspectRatio: true,
-            aspectRatio: 2,
+            aspectRatio: window.innerWidth < 768 ? 1.5 : 2,
             plugins: {
                 legend: {
                     display: false
@@ -282,14 +331,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 data: trafficData,
                 backgroundColor: '#4CC9F0',
                 borderRadius: 6,
-                barPercentage: 0.4,
-                categoryPercentage: 0.6
+                barPercentage: window.innerWidth < 768 ? 0.6 : 0.4,
+                categoryPercentage: window.innerWidth < 768 ? 0.8 : 0.6
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: true,
-            aspectRatio: 2,
+            aspectRatio: window.innerWidth < 768 ? 1.5 : 2,
             plugins: {
                 legend: {
                     display: false
@@ -311,14 +360,59 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Ajuster les graphiques lors du redimensionnement
+window.addEventListener('resize', function() {
+    location.reload(); // Recharger les graphiques avec les nouvelles dimensions
+});
 </script>
 
 <style>
 .chart-container {
     position: relative;
-    height: 300px;
+    height: 250px;
     width: 100%;
     margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+    .chart-container {
+        height: 300px;
+    }
+}
+
+/* Effet de survol pour les cartes */
+.hover-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.hover-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Ajustements responsifs */
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    h4 {
+        font-size: 1.1rem !important;
+    }
+    
+    .fs-5 {
+        font-size: 1rem !important;
+    }
+}
+
+/* Styles pour les icônes */
+.rounded-circle {
+    transition: transform 0.2s;
+}
+
+.hover-card:hover .rounded-circle {
+    transform: scale(1.1);
 }
 </style>
 @endsection

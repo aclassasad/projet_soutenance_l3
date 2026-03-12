@@ -4,7 +4,7 @@
     <td class="px-4 py-3">{{ $p->nom }}</td>
     <td class="px-4 py-3">{{ $p->categorie->nom ?? 'N/A' }}</td>
     <td class="px-4 py-3">{{ $p->stock }} units</td>
-    <td class="px-4 py-3">${{ number_format($p->prix_vente, 2) }}</td>
+    <td class="px-4 py-3">{{ number_format($p->prix_vente, 2) }} FCFA</td>
     <td class="px-4 py-3">{{ $p->emplacement ?? 'A-' . str_pad($p->id, 2, '0', STR_PAD_LEFT) }}</td>
     <td class="px-4 py-3">
         @if($p->stock == 0)
