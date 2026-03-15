@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Vente;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -102,7 +103,13 @@ class UserController extends Controller
     // Afficher un utilisateur
     public function show(User $user)
     {
-        return view('users.show', compact('user'));
+         $ventes = Vente::where('user_id', $user->id)
+        ->with(['lignes.produit', 'user'])
+        ->latest()
+        ->get();
+    
+    $totalVentes = $ventes->sum('total');
+        return view('users.show', compact('user','ventes','totalVentes'));
     }
 
     // Formulaire d’édition

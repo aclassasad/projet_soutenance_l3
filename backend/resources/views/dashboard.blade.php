@@ -182,7 +182,7 @@
                                     <small class="text-muted">{{ $t->created_at->format('d/m/Y H:i') }}</small>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-1">
-                                    <small class="text-muted">${{ number_format($t->total, 2) }}</small>
+                                    <small class="text-muted">{{ number_format($t->total, 2) }} FCFA</small>
                                     <button class="btn btn-sm btn-outline-primary py-0 px-2" data-bs-toggle="modal" data-bs-target="#venteModal{{ $t->id }}">
                                         <i class="fa-solid fa-eye"></i> Détails
                                     </button>
@@ -213,7 +213,7 @@
                                         </div>
                                         <div class="col-12">
                                             <p class="mb-1"><strong>Total</strong></p>
-                                            <h4 class="text-success">${{ number_format($t->total, 2) }}</h4>
+                                            <h4 class="text-success">{{ number_format($t->total, 2) }} FCFA</h4>
                                         </div>
                                         <div class="col-12">
                                             <h6 class="fw-semibold">Produits vendus :</h6>
@@ -232,8 +232,8 @@
                                                         <tr>
                                                             <td>{{ $ligne->produit?->nom ?? 'Produit inconnu' }}</td>
                                                             <td>{{ $ligne->quantite }}</td>
-                                                            <td>${{ number_format($ligne->prix_unitaire, 2) }}</td>
-                                                            <td>${{ number_format($ligne->sous_total, 2) }}</td>
+                                                            <td>{{ number_format($ligne->prix_unitaire, 2) }} FCFA</td>
+                                                            <td>{{ number_format($ligne->sous_total, 2) }} FCFA</td>
                                                         </tr>
                                                         @endforeach
                                                     </tbody>
