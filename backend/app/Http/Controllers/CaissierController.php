@@ -54,7 +54,7 @@ public function dashboard()
             // ⚠️ Ici on force user_id = 1 pour tester sans connexion
             $vente = Vente::create([
                 'date_vente' => now(),
-                'user_id' => 1,
+                'user_id' => auth()->id(),
                 'total' => 0
             ]);
 

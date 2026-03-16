@@ -1,0 +1,49 @@
+name: app_mobile
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  fl_chart: ^1.1.1
+  shared_preferences: ^2.2.2
+  http: ^1.2.0
+  flutter_dotenv: ^5.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_icons:   
+  android: true
+  ios: true
+  image_path: "assets/images/logo.jpeg"        #  logo principal
+  adaptive_icon_background: "#ffffff"           # couleur de fond Android
+  adaptive_icon_foreground: "assets/images/icon.jpeg"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/logo.jpeg
+    - .env.local
+    - .env.tel
+
+  fonts:
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700

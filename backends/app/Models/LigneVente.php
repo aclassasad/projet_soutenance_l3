@@ -1,0 +1,25 @@
+<?php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+class LigneVente extends Model
+{
+    use HasFactory;
+
+    protected $table = 'ligne_ventes'; // ✅ assure-toi que c’est bien le nom de ta table
+    protected $fillable = [
+        'vente_id', 'produit_id', 'quantite',
+        'prix_unitaire', 'sous_total'
+    ];
+
+    public function vente()
+    {
+        return $this->belongsTo(Vente::class, 'vente_id');
+    }
+
+    public function produit()
+    {
+        return $this->belongsTo(Produit::class, 'produit_id');
+    }
+}

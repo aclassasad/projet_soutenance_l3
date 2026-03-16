@@ -29,8 +29,7 @@ class VenteController extends Controller
         $vente = Vente::create([
             'date_vente' => now(),
             'total' => $request->total,
-            'user_id' => $request->user_id,
-        ]);
+            'user_id' => auth()->id(),        ]);
 
         foreach ($request->lignes as $ligne) {
             LigneVente::create([
