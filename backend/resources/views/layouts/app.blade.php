@@ -46,6 +46,10 @@
     body.dark-mode .text-muted {
         color: #a0a0a0 !important;
     }
+    .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
     /* Ajoutez d'autres sélecteurs selon les besoins */
 </style>
 

@@ -40,7 +40,7 @@
                 <input type="password" id="password" name="password" placeholder="Entrer votre mot de passe" required>
 
                 @error('email')
-                    <div class="text-danger small">{{ $message }}</div>
+                    <div class="text-danger small" style="color: red;">{{ $message }}</div>
                 @enderror
 
                 <a href="{{ route('password.request') }}" class="forgot-password">Mot de passe oublié ?</a>

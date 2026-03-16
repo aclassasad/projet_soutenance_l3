@@ -160,39 +160,84 @@
 </div>
 
 <!-- Modal Ajouter -->
-<div class="modal fade" id="addEmployeeModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Ajouter un employé</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="addEmployeeModalLabel">
+                    <i class="fa-solid fa-user-plus me-2"></i>Ajouter un employé
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('users.store') }}" method="POST" id="addEmployeeForm">
                 @csrf
-                <div class="modal-body">
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                    <!-- Nom -->
                     <div class="mb-3">
-                        <label>Nom</label>
-                        <input type="text" name="name" class="form-control" required>
+                        <label for="modal_name" class="form-label fw-semibold">Nom</label>
+                        <input type="text" name="name" id="modal_name" class="form-control" required>
                     </div>
+
+                    <!-- Email avec validation -->
                     <div class="mb-3">
-                        <label>Email</label>
-                        <input type="email" name="email" class="form-control" required>
+                        <label for="modal_email" class="form-label fw-semibold">Email</label>
+                        <input type="email" name="email" id="modal_email" class="form-control" required>
+                        <div id="modalEmailFeedback" class="text-danger mt-1 small"></div>
                     </div>
+
+                    <!-- Mot de passe avec conditions -->
                     <div class="mb-3">
-                        <label>Mot de passe</label>
-                        <input type="password" name="password" class="form-control" required>
+                        <label for="modal_password" class="form-label fw-semibold">Mot de passe</label>
+                        <div class="input-group">
+                            <input type="password" name="password" id="modal_password" class="form-control" required>
+                            <button type="button" class="btn btn-outline-secondary" id="modalTogglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+
+                        <!-- Barre de progression -->
+                        <div class="progress mt-2" style="height: 20px;">
+                            <div id="modalPasswordStrength" class="progress-bar" role="progressbar" style="width: 0%">
+                                Faible
+                            </div>
+                        </div>
+
+                        <!-- Conditions -->
+                        <ul class="mt-2 small">
+                            <li id="modalLength" class="text-danger">❌ Au moins 8 caractères</li>
+                            <li id="modalUppercase" class="text-danger">❌ Au moins une majuscule</li>
+                            <li id="modalLowercase" class="text-danger">❌ Au moins une minuscule</li>
+                            <li id="modalNumber" class="text-danger">❌ Au moins un chiffre</li>
+                            <li id="modalSpecial" class="text-danger">❌ Au moins un caractère spécial (@$!%*?&)</li>
+                        </ul>
                     </div>
+
+                    <!-- Confirmation mot de passe -->
                     <div class="mb-3">
-                        <label>Rôle</label>
-                        <select name="role" class="form-select" required>
+                        <label for="modal_password_confirmation" class="form-label fw-semibold">Confirmer le mot de passe</label>
+                        <div class="input-group">
+                            <input type="password" name="password_confirmation" id="modal_password_confirmation" class="form-control" required>
+                            <button type="button" class="btn btn-outline-secondary" id="modalToggleConfirm">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <div id="modalConfirmFeedback" class="text-danger mt-1 small"></div>
+                    </div>
+
+                    <!-- Rôle -->
+                    <div class="mb-3">
+                        <label for="modal_role" class="form-label fw-semibold">Rôle</label>
+                        <select name="role" id="modal_role" class="form-select" required>
                             <option value="admin">Admin</option>
                             <option value="gerant">Gérant</option>
                             <option value="caissier">Caissier</option>
                         </select>
                     </div>
+
+                    <!-- Statut -->
                     <div class="mb-3">
-                        <label>Statut</label>
-                        <select name="statut" class="form-select">
+                        <label for="modal_statut" class="form-label fw-semibold">Statut</label>
+                        <select name="statut" id="modal_statut" class="form-select">
                             <option value="1">Actif</option>
                             <option value="0">En congé</option>
                         </select>
@@ -200,9 +245,31 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">Créer</button>
+                    <button type="submit" class="btn btn-primary" id="modalSubmitBtn">
+                        <i class="fa-solid fa-save me-2"></i>Créer
+                    </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmation Succès Ajout -->
+<div class="modal fade" id="successModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-circle-check me-2"></i>Succès
+                </h5>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fa-solid fa-check-circle text-success fs-1 mb-3"></i>
+                <h4 id="successMessage" class="mb-0">Employé ajouté avec succès !</h4>
+            </div>
+            <div class="modal-footer justify-content-center border-0 pt-0 pb-4">
+                <button type="button" class="btn btn-success px-5" id="successModalOk" data-bs-dismiss="modal">OK</button>
+            </div>
         </div>
     </div>
 </div>
@@ -233,116 +300,332 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-right: 15px;
+    }
+    
+    /* Style pour la barre de progression */
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        transition: width 0.3s ease;
+        font-weight: 500;
+        font-size: 12px;
+    }
+    
+    /* Style pour les messages de validation */
+    .text-success {
+        color: #198754 !important;
+    }
+    
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    
+    /* Style pour la modal */
+    .modal-content {
+        border: none;
+        border-radius: 16px;
+    }
+    
+    .modal-header {
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+    }
+    
+    /* Animation pour le modal de succès */
+    .modal.fade .modal-dialog {
+        transition: transform 0.3s ease-out;
+        transform: scale(0.9);
+    }
+    
+    .modal.show .modal-dialog {
+        transform: scale(1);
+    }
+    
+    .bg-success .btn-close {
+        filter: brightness(0) invert(1);
+    }
+</style>
 @endpush
 
 @push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
-    // Configuration de toastr
-    toastr.options = {
-        "closeButton": true,
-        "progressBar": true,
-        "positionClass": "toast-top-right",
-        "showDuration": "300",
-        "hideDuration": "1000",
-        "timeOut": "5000",
-        "extendedTimeOut": "1000"
-    };
+// Fonction pour ouvrir le modal de suppression
+function openDeleteModal(userId, userName) {
+    document.getElementById('deleteEmployeeName').textContent = userName;
+    document.getElementById('deleteForm').action = '/users/' + userId;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
 
-    // Fonction pour ouvrir le modal de suppression
-    function openDeleteModal(userId, userName) {
-        document.getElementById('deleteEmployeeName').textContent = userName;
-        document.getElementById('deleteForm').action = '/users/' + userId;
-        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+// Script pour le formulaire d'ajout dans le modal
+document.addEventListener('DOMContentLoaded', function() {
+    const modalForm = document.getElementById('addEmployeeForm');
+    if (!modalForm) return;
+
+    // Éléments du formulaire modal
+    const modalEmail = document.getElementById('modal_email');
+    const modalEmailFeedback = document.getElementById('modalEmailFeedback');
+    const modalPassword = document.getElementById('modal_password');
+    const modalConfirm = document.getElementById('modal_password_confirmation');
+    const modalStrengthBar = document.getElementById('modalPasswordStrength');
+    const modalConfirmFeedback = document.getElementById('modalConfirmFeedback');
+    const modalTogglePassword = document.getElementById('modalTogglePassword');
+    const modalToggleConfirm = document.getElementById('modalToggleConfirm');
+    const modalSubmitBtn = document.getElementById('modalSubmitBtn');
+
+    // Références aux éléments de conditions
+    const modalLength = document.getElementById('modalLength');
+    const modalUppercase = document.getElementById('modalUppercase');
+    const modalLowercase = document.getElementById('modalLowercase');
+    const modalNumber = document.getElementById('modalNumber');
+    const modalSpecial = document.getElementById('modalSpecial');
+
+    // Vérification email en temps réel
+    modalEmail.addEventListener('input', function() {
+        const value = modalEmail.value;
+        const regex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+        if (regex.test(value)) {
+            modalEmail.classList.remove('is-invalid');
+            modalEmail.classList.add('is-valid');
+            modalEmailFeedback.classList.remove('text-danger');
+            modalEmailFeedback.classList.add('text-success');
+            modalEmailFeedback.textContent = "✅ Format email valide";
+        } else {
+            modalEmail.classList.remove('is-valid');
+            modalEmail.classList.add('is-invalid');
+            modalEmailFeedback.classList.remove('text-success');
+            modalEmailFeedback.classList.add('text-danger');
+            modalEmailFeedback.textContent = "❌ Format email invalide";
+        }
+    });
+
+    // Afficher/masquer mot de passe
+    if (modalTogglePassword) {
+        modalTogglePassword.addEventListener('click', function() {
+            const type = modalPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            modalPassword.setAttribute('type', type);
+            this.innerHTML = type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
+        });
     }
 
-    // Script pour le formulaire d'ajout
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('addEmployeeForm');
-        if (!form) return;
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.innerHTML;
-            
-            // Désactiver le bouton
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Ajout...';
-            
-            const formData = new FormData(form);
-            
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erreur réseau');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Fermer le modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addEmployeeModal'));
-                    if (modal) {
-                        modal.hide();
-                    }
-                    
-                    // Réinitialiser le formulaire
-                    form.reset();
-                    
-                    // Notification en haut à gauche
-                    toastr.options.positionClass = "toast-top-left";
-                    toastr.success(data.message, "Succès");
-                    
-                    // Recharger la page après un court délai
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                    
-                } else {
-                    toastr.error(data.message || 'Erreur lors de l\'ajout', 'Erreur');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                toastr.error('Une erreur est survenue. Vérifiez la console.', 'Erreur');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            });
+    // Afficher/masquer confirmation
+    if (modalToggleConfirm) {
+        modalToggleConfirm.addEventListener('click', function() {
+            const type = modalConfirm.getAttribute('type') === 'password' ? 'text' : 'password';
+            modalConfirm.setAttribute('type', type);
+            this.innerHTML = type === 'password' ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
         });
+    }
 
-        // Réinitialiser le formulaire à la fermeture du modal
-        const modal = document.getElementById('addEmployeeModal');
-        if (modal) {
-            modal.addEventListener('hidden.bs.modal', function() {
-                document.getElementById('addEmployeeForm').reset();
-                const submitBtn = document.getElementById('submitBtn');
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Créer';
+    // Vérification force du mot de passe
+    modalPassword.addEventListener('input', function() {
+        const value = modalPassword.value;
+        let strength = 0;
+
+        // Longueur
+        if (value.length >= 8) {
+            modalLength.classList.remove('text-danger');
+            modalLength.classList.add('text-success');
+            modalLength.innerHTML = "✅ Au moins 8 caractères";
+            strength++;
+        } else {
+            modalLength.classList.remove('text-success');
+            modalLength.classList.add('text-danger');
+            modalLength.innerHTML = "❌ Au moins 8 caractères";
+        }
+
+        // Majuscule
+        if (/[A-Z]/.test(value)) {
+            modalUppercase.classList.remove('text-danger');
+            modalUppercase.classList.add('text-success');
+            modalUppercase.innerHTML = "✅ Au moins une majuscule";
+            strength++;
+        } else {
+            modalUppercase.classList.remove('text-success');
+            modalUppercase.classList.add('text-danger');
+            modalUppercase.innerHTML = "❌ Au moins une majuscule";
+        }
+
+        // Minuscule
+        if (/[a-z]/.test(value)) {
+            modalLowercase.classList.remove('text-danger');
+            modalLowercase.classList.add('text-success');
+            modalLowercase.innerHTML = "✅ Au moins une minuscule";
+            strength++;
+        } else {
+            modalLowercase.classList.remove('text-success');
+            modalLowercase.classList.add('text-danger');
+            modalLowercase.innerHTML = "❌ Au moins une minuscule";
+        }
+
+        // Chiffre
+        if (/\d/.test(value)) {
+            modalNumber.classList.remove('text-danger');
+            modalNumber.classList.add('text-success');
+            modalNumber.innerHTML = "✅ Au moins un chiffre";
+            strength++;
+        } else {
+            modalNumber.classList.remove('text-success');
+            modalNumber.classList.add('text-danger');
+            modalNumber.innerHTML = "❌ Au moins un chiffre";
+        }
+
+        // Caractère spécial
+        if (/[@$!%*?&]/.test(value)) {
+            modalSpecial.classList.remove('text-danger');
+            modalSpecial.classList.add('text-success');
+            modalSpecial.innerHTML = "✅ Au moins un caractère spécial (@$!%*?&)";
+            strength++;
+        } else {
+            modalSpecial.classList.remove('text-success');
+            modalSpecial.classList.add('text-danger');
+            modalSpecial.innerHTML = "❌ Au moins un caractère spécial (@$!%*?&)";
+        }
+
+        // Mise à jour de la barre
+        switch (strength) {
+            case 0:
+            case 1:
+                modalStrengthBar.style.width = "25%";
+                modalStrengthBar.className = "progress-bar bg-danger";
+                modalStrengthBar.textContent = "Faible";
+                break;
+            case 2:
+                modalStrengthBar.style.width = "50%";
+                modalStrengthBar.className = "progress-bar bg-warning";
+                modalStrengthBar.textContent = "Moyen";
+                break;
+            case 3:
+                modalStrengthBar.style.width = "75%";
+                modalStrengthBar.className = "progress-bar bg-info";
+                modalStrengthBar.textContent = "Bon";
+                break;
+            case 4:
+            case 5:
+                modalStrengthBar.style.width = "100%";
+                modalStrengthBar.className = "progress-bar bg-success";
+                modalStrengthBar.textContent = "Fort";
+                break;
+        }
+    });
+
+    // Vérification confirmation mot de passe
+    modalConfirm.addEventListener('input', function() {
+        if (modalConfirm.value !== modalPassword.value) {
+            modalConfirm.classList.add('is-invalid');
+            modalConfirmFeedback.textContent = "❌ Les mots de passe ne correspondent pas";
+            modalConfirmFeedback.classList.remove('text-success');
+            modalConfirmFeedback.classList.add('text-danger');
+        } else {
+            modalConfirm.classList.remove('is-invalid');
+            modalConfirm.classList.add('is-valid');
+            modalConfirmFeedback.textContent = "✅ Les mots de passe correspondent";
+            modalConfirmFeedback.classList.remove('text-danger');
+            modalConfirmFeedback.classList.add('text-success');
+        }
+    });
+
+    // Soumission du formulaire en AJAX
+    modalForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Désactiver le bouton
+        modalSubmitBtn.disabled = true;
+        modalSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Traitement...';
+
+        const formData = new FormData(modalForm);
+
+        fetch(modalForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur réseau');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Fermer le modal d'ajout
+                const addModal = bootstrap.Modal.getInstance(document.getElementById('addEmployeeModal'));
+                if (addModal) {
+                    addModal.hide();
                 }
-            });
-        }
+
+                // Afficher le message de succès
+                document.getElementById('successMessage').textContent = data.message || 'Employé ajouté avec succès !';
+                const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+
+                // Quand on clique sur OK, recharger la page
+                document.getElementById('successModalOk').addEventListener('click', function() {
+                    window.location.reload();
+                });
+                
+            } else {
+                alert('Erreur: ' + (data.message || 'Erreur lors de l\'ajout'));
+                modalSubmitBtn.disabled = false;
+                modalSubmitBtn.innerHTML = '<i class="fa-solid fa-save me-2"></i>Créer';
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Une erreur est survenue');
+            modalSubmitBtn.disabled = false;
+            modalSubmitBtn.innerHTML = '<i class="fa-solid fa-save me-2"></i>Créer';
+        });
     });
 
-    // Afficher la notification de succès si elle existe dans la session
-    @if(session('success'))
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof toastr !== 'undefined') {
-            toastr.success("{{ session('success') }}", "Succès");
-        }
-    });
-    @endif
+    // Réinitialiser le formulaire à la fermeture du modal
+    const modal = document.getElementById('addEmployeeModal');
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', function() {
+            modalForm.reset();
+            
+            // Réinitialiser les classes de validation
+            [modalEmail, modalPassword, modalConfirm].forEach(input => {
+                input.classList.remove('is-valid', 'is-invalid');
+            });
+            
+            // Réinitialiser la barre de force
+            modalStrengthBar.style.width = "0%";
+            modalStrengthBar.className = "progress-bar";
+            modalStrengthBar.textContent = "Faible";
+            
+            // Réinitialiser les conditions
+            const conditions = [modalLength, modalUppercase, modalLowercase, modalNumber, modalSpecial];
+            conditions.forEach(cond => {
+                cond.classList.remove('text-success');
+                cond.classList.add('text-danger');
+            });
+            modalLength.innerHTML = "❌ Au moins 8 caractères";
+            modalUppercase.innerHTML = "❌ Au moins une majuscule";
+            modalLowercase.innerHTML = "❌ Au moins une minuscule";
+            modalNumber.innerHTML = "❌ Au moins un chiffre";
+            modalSpecial.innerHTML = "❌ Au moins un caractère spécial (@$!%*?&)";
+            
+            // Réinitialiser les feedbacks
+            modalEmailFeedback.textContent = "";
+            modalConfirmFeedback.textContent = "";
+            
+            // Réactiver le bouton
+            modalSubmitBtn.disabled = false;
+            modalSubmitBtn.innerHTML = '<i class="fa-solid fa-save me-2"></i>Créer';
+        });
+    }
+});
 </script>
 @endpush

@@ -3,75 +3,80 @@
 @section('title', 'Inventory')
 
 @section('content')
-<div class="mx-4">
-    <!-- Header avec titre et description comme sur la maquette -->
+<div class="container-fluid px-3 px-md-4">
+    <!-- Header avec titre et description -->
     <div class="mb-4">
         <h2 class="fw-bold mb-1">Inventory Management</h2>
         <p class="text-muted">Manage your store's product inventory</p>
     </div>
 
-    <!-- Metrics Cards - Style maquette avec icônes -->
-    <div class="row my-4">
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted">Total Products</h6>
-                        <h4 class="fw-bold">{{ $stats['total_produits'] }}</h4>
+    <!-- Metrics Cards - Responsive -->
+    <div class="row g-3 g-md-4 mb-4">
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 hover-card">
+                <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
+                    <div class="w-75 w-md-100 w-lg-75">
+                        <h6 class="text-muted small mb-1 mb-md-2">Total Products</h6>
+                        <h4 class="fw-bold mb-0 fs-5 fs-md-4">{{ $stats['total_produits'] }}</h4>
                     </div>
-                    <div class="bg-primary bg-opacity-10 p-3 rounded">
-                        <i class="fa-solid fa-boxes text-primary fs-3"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted">Low Stock Items</h6>
-                        <h4 class="fw-bold">{{ $stats['produits_stock_baisse'] }}</h4>
-                    </div>
-                    <div class="bg-warning bg-opacity-10 p-3 rounded">
-                        <i class="fa-solid fa-exclamation-triangle text-warning fs-3"></i>
+                    <div class="bg-primary bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
+                        <i class="fa-solid fa-boxes text-primary fs-5 fs-md-4"></i>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted">Out of Stock</h6>
-                        <h4 class="fw-bold">{{ $stats['produits_stock_fini'] }}</h4>
+        
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 hover-card">
+                <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
+                    <div class="w-75 w-md-100 w-lg-75">
+                        <h6 class="text-muted small mb-1 mb-md-2">Low Stock Items</h6>
+                        <h4 class="fw-bold mb-0 fs-5 fs-md-4">{{ $stats['produits_stock_baisse'] }}</h4>
                     </div>
-                    <div class="bg-danger bg-opacity-10 p-3 rounded">
-                        <i class="fa-solid fa-times-circle text-danger fs-3"></i>
+                    <div class="bg-warning bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
+                        <i class="fa-solid fa-exclamation-triangle text-warning fs-5 fs-md-4"></i>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted">Total Value</h6>
-                        <h4 class="fw-bold">${{ $stats['valeur_totale'] }}</h4>
+        
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 hover-card">
+                <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
+                    <div class="w-75 w-md-100 w-lg-75">
+                        <h6 class="text-muted small mb-1 mb-md-2">Out of Stock</h6>
+                        <h4 class="fw-bold mb-0 fs-5 fs-md-4">{{ $stats['produits_stock_fini'] }}</h4>
                     </div>
-                    <div class="bg-success bg-opacity-10 p-3 rounded">
-                        <i class="fa-solid fa-dollar-sign text-success fs-3"></i>
+                    <div class="bg-danger bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
+                        <i class="fa-solid fa-times-circle text-danger fs-5 fs-md-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 hover-card">
+                <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
+                    <div class="w-75 w-md-100 w-lg-75">
+                        <h6 class="text-muted small mb-1 mb-md-2">Total Value</h6>
+                        <h4 class="fw-bold mb-0 fs-5 fs-md-4">{{ number_format($stats['valeur_totale'], 0, ',', ' ') }} <small class="fs-6">FCFA</small></h4>
+                    </div>
+                    <div class="bg-success bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
+                        <i class="fa-solid fa-wallet text-success fs-5 fs-md-4"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Search + Filter + Add Product inchangé -->
-    <div class="d-flex justify-content-between mb-3">
-        <div class="d-flex w-75 gap-2">
-            <input type="text" id="searchInput" class="form-control w-50" placeholder="Search by product name or SKU...">
-
-            <select id="categoryFilter" class="form-select w-25">
+    <!-- Search + Filter + Add Product - Responsive -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center mb-3 gap-2">
+        <div class="d-flex flex-column flex-sm-row w-100 w-md-75 gap-2">
+            <div class="position-relative flex-grow-1">
+                <i class="fa-solid fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                <input type="text" id="searchInput" class="form-control ps-5" style="height: 100%;" placeholder="Search by product name or SKU...">
+            </div>
+            <select id="categoryFilter" class="form-select w-100 w-sm-50 w-md-25">
                 <option value="">All Categories</option>
                 @foreach($categories as $cat)
                     <option value="{{ $cat->id }}">{{ $cat->nom }}</option>
@@ -79,34 +84,34 @@
             </select>
         </div>
 
-        <!-- ✅ Nouveau bouton Mon gestionnaire -->
-        <div class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" id="gestionnaireMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                Mon gestionnaire
+        <!-- Menu Mon gestionnaire -->
+        <div class="dropdown w-100 w-md-auto">
+            <button class="btn btn-primary dropdown-toggle w-100 w-md-auto" type="button" id="gestionnaireMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-gear me-2"></i>Mon gestionnaire
             </button>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="gestionnaireMenu">
-                <li><a class="dropdown-item" href="{{ route('produits.index') }}">Produits</a></li>
-                <li><a class="dropdown-item" href="{{ route('categories.index') }}">Catégories</a></li>
-                <li><a class="dropdown-item" href="{{ route('fournisseurs.index') }}">Fournisseurs</a></li>
+                <li><a class="dropdown-item" href="{{ route('produits.index') }}"><i class="fa-solid fa-box me-2"></i>Produits</a></li>
+                <li><a class="dropdown-item" href="{{ route('categories.index') }}"><i class="fa-solid fa-tags me-2"></i>Catégories</a></li>
+                <li><a class="dropdown-item" href="{{ route('fournisseurs.index') }}"><i class="fa-solid fa-truck me-2"></i>Fournisseurs</a></li>
             </ul>
         </div>
     </div>
 
-    <!-- Product Table avec style maquette -->
-    <div class="card">
+    <!-- Product Table - Responsive -->
+    <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="px-4 py-3">SKU</th>
-                            <th class="px-4 py-3">PRODUCT NAME</th>
-                            <th class="px-4 py-3">CATEGORY</th>
-                            <th class="px-4 py-3">STOCK</th>
-                            <th class="px-4 py-3">PRICE</th>
-                            <th class="px-4 py-3">LOCATION</th>
-                            <th class="px-4 py-3">STATUS</th>
-                            <th class="px-4 py-3">ACTIONS</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">SKU</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">PRODUCT NAME</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small d-none d-md-table-cell">CATEGORY</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small text-end">STOCK</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small text-end">PRICE</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small d-none d-lg-table-cell">LOCATION</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">STATUS</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small text-center">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody id="inventoryTable">
@@ -153,10 +158,6 @@ function loadInventory() {
 
 function deleteProduct(id) {
     if(confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-        // À implémenter avec une requête AJAX ou un formulaire
-        console.log('Delete product ' + id);
-        
-        // Exemple avec fetch pour une suppression AJAX
         fetch(`/produits/${id}`, {
             method: 'DELETE',
             headers: {
@@ -167,7 +168,6 @@ function deleteProduct(id) {
         .then(response => response.json())
         .then(data => {
             if(data.success) {
-                // Recharger la liste après suppression
                 loadInventory();
             } else {
                 alert('Erreur lors de la suppression');
