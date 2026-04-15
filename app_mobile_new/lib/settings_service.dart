@@ -1,29 +1,56 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsService {
-  /// 🔹 Charger les paramètres
+  static const String _keyLanguage = 'app_language';
+  static const String _keyTheme = 'app_theme';
+  static const String _keyEmailNotifications = 'email_notifications';
+  static const String _keyPushNotifications = 'push_notifications';
+
+  static final ValueNotifier<String> themeNotifier = ValueNotifier('light');
+
   static Future<Map<String, dynamic>> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    
     return {
-      "language": prefs.getString("language") ?? "fr",
-      "theme": prefs.getString("theme") ?? "light",
-      "email_notifications": prefs.getBool("email_notifications") ?? true,
-      "push_notifications": prefs.getBool("push_notifications") ?? true,
+      "language": prefs.getString(_keyLanguage) ?? "fr",
+      "theme": prefs.getString(_keyTheme) ?? "light",
+      "email_notifications": prefs.getBool(_keyEmailNotifications) ?? true,
+      "push_notifications": prefs.getBool(_keyPushNotifications) ?? true,
     };
   }
 
-  /// 🔹 Sauvegarder les paramètres
   static Future<void> saveSettings(Map<String, dynamic> settings) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("language", settings["language"]);
-    await prefs.setString("theme", settings["theme"]);
-    await prefs.setBool("email_notifications", settings["email_notifications"]);
-    await prefs.setBool("push_notifications", settings["push_notifications"]);
+    
+    if (settings.containsKey("language")) {
+      await prefs.setString(_keyLanguage, settings["language"]);
+    }
+    if (settings.containsKey("theme")) {
+      await prefs.setString(_keyTheme, settings["theme"]);
+      themeNotifier.value = settings["theme"];
+    }
+    if (settings.containsKey("email_notifications")) {
+      await prefs.setBool(_keyEmailNotifications, settings["email_notifications"]);
+    }
+    if (settings.containsKey("push_notifications")) {
+      await prefs.setBool(_keyPushNotifications, settings["push_notifications"]);
+    }
   }
 
-  /// 🔹 Réinitialiser les paramètres par défaut
   static Future<void> resetSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    
+    await prefs.setString(_keyLanguage, "fr");
+    await prefs.setString(_keyTheme, "light");
+    await prefs.setBool(_keyEmailNotifications, true);
+    await prefs.setBool(_keyPushNotifications, true);
+    
+    themeNotifier.value = "light";
+  }
+
+  static Future<String> getCurrentTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyTheme) ?? "light";
   }
 }

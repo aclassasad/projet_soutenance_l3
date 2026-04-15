@@ -19,7 +19,33 @@ class SecureStoreApp extends StatelessWidget {
     return MaterialApp(
       title: "SecureStore Pro",
       navigatorKey: navigatorKey,
-      theme: ThemeData.light(),
+      theme: ThemeData.light().copyWith(
+        primaryColor: const Color(0xFF4361EE),
+        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: false,
+          titleTextStyle: TextStyle(
+            color: Color(0xFF1E293B),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          iconTheme: IconThemeData(color: Color(0xFF64748B)),
+        ),
+        cardTheme: const CardThemeData(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+          clipBehavior: Clip.antiAlias,
+        ),
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF4361EE),
+          secondary: Color(0xFF06B6D4),
+          surface: Colors.white,
+        ),
+      ),
       darkTheme: ThemeData.dark(),
       themeMode: ThemeMode.system,
       initialRoute: "/dashboard",
@@ -57,7 +83,12 @@ class _DashboardPageState extends State<DashboardPage> {
     } catch (e) {
       setState(() => loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur: $e")),
+        SnackBar(
+          content: Text("Erreur: $e"),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -65,105 +96,441 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     if (loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(color: Color(0xFF4361EE)),
+              const SizedBox(height: 16),
+              Text(
+                "Chargement du tableau de bord...",
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     final isMobile = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Dashboard")),
+      appBar: AppBar(
+        title:  const Text(
+              "Dashboard",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {},
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text("Dashboard", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          const Text("Welcome back! Here's what's happening today.", style: TextStyle(color: Colors.grey)),
-
-          const SizedBox(height: 16),
-          // Metrics Cards en une seule ligne scrollable
-// 🔹 Metrics Cards en une seule ligne scrollable
-// 🔹 Metrics Cards en une seule ligne scrollable
-SingleChildScrollView(
-  scrollDirection: Axis.horizontal,
-  child: Row(
-    children: [
-      _metricCard("Total Revenue", "\$${stats?['total_revenu'] ?? 0}", Colors.green, Icons.attach_money, "+12.5%"),
-      _metricCard("Categories", "${stats?['nombre_categories'] ?? 0}", Colors.orange, Icons.category, "⚠️ Some low stock"),
-      _metricCard("Products in Stock", "${stats?['total_produits_stock'] ?? 0}", Colors.blue, Icons.inventory, "-3.2%"),
-      _metricCard("Active Employees", "${stats?['employes_actifs'] ?? 0}", Colors.teal, Icons.people, "+2"),
-    ].map((card) => Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child: card, // ✅ plus besoin de SizedBox externe
-    )).toList(),
-  ),
-),
-
-          const SizedBox(height: 24),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              SizedBox(
-                width: isMobile ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.width / 2 - 24,
-                child: _lineChartCard("Weekly Sales", stats?['weekly_sales_labels'] ?? [], stats?['weekly_sales_data'] ?? []),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header avec bienvenue
+           
+            const SizedBox(height: 4),
+            Text(
+              "Welcome back! Here's what's happening today.",
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
               ),
-              SizedBox(
-                width: isMobile ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.width / 2 - 24,
-                child: _barChartCard("Store Traffic Today", stats?['store_traffic'] ?? []),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Metrics Cards - Disposition verticale
+            const Text(
+              "Aperçu rapide",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            // Cartes métriques les unes au-dessus des autres
+            _metricCard(
+              "Total Revenue",
+              "\$${stats?['total_revenu'] ?? 0}",
+              "+12.5%",
+              Icons.attach_money,
+              const Color(0xFF10B981),
+            ),
+            const SizedBox(height: 12),
+            
+            _metricCard(
+              "Categories",
+              "${stats?['nombre_categories'] ?? 0}",
+              "⚠️ Low stock",
+              Icons.category,
+              const Color(0xFFF59E0B),
+            ),
+            const SizedBox(height: 12),
+            
+            _metricCard(
+              "Products in Stock",
+              "${stats?['total_produits_stock'] ?? 0}",
+              "-3.2%",
+              Icons.inventory,
+              const Color(0xFF4361EE),
+            ),
+            const SizedBox(height: 12),
+            
+            _metricCard(
+              "Active Employees",
+              "${stats?['employes_actifs'] ?? 0}",
+              "+2",
+              Icons.people,
+              const Color(0xFF06B6D4),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Graphiques
+            if (isMobile) ...[
+              _buildChartCard(
+                "Weekly Sales",
+                _lineChart(stats?['weekly_sales_data'] ?? [8000, 6000, 4000, 2000, 8500, 9500, 7000]),
+              ),
+              const SizedBox(height: 16),
+              _buildChartCard(
+                "Store Traffic Today",
+                _barChart(stats?['store_traffic'] ?? []),
+              ),
+            ] else ...[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _buildChartCard(
+                      "Weekly Sales",
+                      _lineChart(stats?['weekly_sales_data'] ?? [8000, 6000, 4000, 2000, 8500, 9500, 7000]),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildChartCard(
+                      "Store Traffic Today",
+                      _barChart(stats?['store_traffic'] ?? []),
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
 
-          const SizedBox(height: 24),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              SizedBox(
-                width: isMobile ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.width / 2 - 24,
-                child: _alertsCard(stats?['alerts'] ?? []),
+            const SizedBox(height: 24),
+
+            // Alertes et Activités
+            if (isMobile) ...[
+              _buildSectionCard(
+                "Recent Alerts",
+                _alertsList(stats?['alerts'] ?? []),
+                showViewAll: true,
               ),
-              SizedBox(
-                width: isMobile ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.width / 2 - 24,
-                child: _activityCard(stats?['transactions_recentes'] ?? []),
+              const SizedBox(height: 16),
+              _buildSectionCard(
+                "Recent Activity",
+                _activityList(stats?['transactions_recentes'] ?? []),
+                showViewAll: true,
+              ),
+            ] else ...[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _buildSectionCard(
+                      "Recent Alerts",
+                      _alertsList(stats?['alerts'] ?? []),
+                      showViewAll: true,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildSectionCard(
+                      "Recent Activity",
+                      _activityList(stats?['transactions_recentes'] ?? []),
+                      showViewAll: true,
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
 
- Widget _metricCard(String title, String value, Color color, IconData icon, String subtitle) {
-  return Card(
-    elevation: 3,
-    child: SizedBox(
-      width: 180,
-      height: 120, // hauteur uniforme
+  // Carte pour les métriques - Version verticale avec largeur pleine
+  Widget _metricCard(String title, String value, String subtitle, IconData icon, Color color) {
+    return Container(
+      width: double.infinity,  // Prend toute la largeur
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(title, style: const TextStyle(color: Colors.grey)),
-                const SizedBox(height: 6),
-                Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text(
-                  subtitle,
-                  style: TextStyle(color: color, fontSize: 12),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: subtitle.contains('+') || subtitle.contains('⚠️')
+                          ? color
+                          : subtitle.contains('-')
+                              ? Colors.red
+                              : color,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            CircleAvatar(
-              backgroundColor: color.withOpacity(0.1),
-              child: Icon(icon, color: color),
+            const SizedBox(width: 16),
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: color, size: 30),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Carte pour les graphiques
+  Widget _buildChartCard(String title, Widget chart) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 200,
+              child: chart,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Graphique linéaire
+  Widget _lineChart(List<dynamic> data) {
+    final salesData = data.map((e) => (e as num).toDouble()).toList();
+    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    return LineChart(
+      LineChartData(
+        gridData: FlGridData(show: false),
+        titlesData: FlTitlesData(
+          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                if (value >= 0 && value < days.length) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      days[value.toInt()],
+                      style: const TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 10,
+                      ),
+                    ),
+                  );
+                }
+                return const Text('');
+              },
+            ),
+          ),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        borderData: FlBorderData(show: false),
+        lineBarsData: [
+          LineChartBarData(
+            spots: List.generate(
+              salesData.length,
+              (i) => FlSpot(i.toDouble(), salesData[i]),
+            ),
+            isCurved: true,
+            color: const Color(0xFF4361EE),
+            barWidth: 3,
+            belowBarData: BarAreaData(
+              show: true,
+              color: const Color(0xFF4361EE).withOpacity(0.1),
+            ),
+            dotData: FlDotData(
+              show: true,
+              getDotPainter: (spot, percent, barData, index) {
+                return FlDotCirclePainter(
+                  radius: 3,
+                  color: Colors.white,
+                  strokeWidth: 2,
+                  strokeColor: const Color(0xFF4361EE),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Graphique à barres - CORRIGÉ
+Widget _barChart(List<dynamic> traffic) {
+  // Vérifier si traffic est vide
+  if (traffic.isEmpty) {
+    return const Center(
+      child: Text(
+        "Aucune donnée disponible",
+        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+      ),
+    );
+  }
+
+  // Extraire les valeurs et les heures de manière sécurisée
+  final List<double> values = [];
+  final List<String> hours = [];
+
+  for (var item in traffic) {
+    if (item != null && item.containsKey('value') && item.containsKey('hour')) {
+      final value = item['value'];
+      final hour = item['hour'];
+      if (value != null && hour != null) {
+        values.add((value is num ? value : 0).toDouble());
+        hours.add(hour.toString());
+      }
+    }
+  }
+
+  // Vérifier si on a des données valides
+  if (values.isEmpty) {
+    return const Center(
+      child: Text(
+        "Données invalides",
+        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+      ),
+    );
+  }
+
+  return BarChart(
+    BarChartData(
+      gridData: FlGridData(show: false),
+      titlesData: FlTitlesData(
+        leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            getTitlesWidget: (value, meta) {
+              final index = value.toInt();
+              if (index >= 0 && index < hours.length) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    hours[index],
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 10,
+                    ),
+                  ),
+                );
+              }
+              return const Text('');
+            },
+          ),
+        ),
+        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      ),
+      borderData: FlBorderData(show: false),
+      barGroups: List.generate(
+        values.length,
+        (i) => BarChartGroupData(
+          x: i,
+          barRods: [
+            BarChartRodData(
+              toY: values[i],
+              color: const Color(0xFF06B6D4),
+              width: 20,
+              borderRadius: BorderRadius.circular(4),
             ),
           ],
         ),
@@ -172,167 +539,314 @@ SingleChildScrollView(
   );
 }
 
-  Widget _lineChartCard(String title, List<dynamic> labels, List<dynamic> data) {
-    final salesData = (data ?? []).map((e) => (e as num).toDouble()).toList();
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-          SizedBox(
-            height: 200,
-            child: LineChart(LineChartData(
-              titlesData: FlTitlesData(
-                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              ),
-              gridData: FlGridData(show: false), // ✅ supprime les lignes de grille
-              lineBarsData: [
-                LineChartBarData(
-                  spots: List.generate(salesData.length, (i) => FlSpot(i.toDouble(), salesData[i])),
-                  isCurved: true,
-                  color: Colors.indigo,
-                  barWidth: 3,
-                  belowBarData: BarAreaData(show: true, color: Colors.indigo.withOpacity(0.1)),
-                )
-              ],
-            )),
+  // Carte pour les sections (alertes, activités)
+  Widget _buildSectionCard(String title, Widget content, {bool showViewAll = false}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
           ),
-        ]),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+                if (showViewAll)
+                  TextButton(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(50, 30),
+                    ),
+                    child: const Text(
+                      "View All",
+                      style: TextStyle(
+                        color: Color(0xFF4361EE),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            content,
+          ],
+        ),
       ),
     );
   }
 
-  Widget _barChartCard(String title, List<dynamic> traffic) {
-    final trafficData = traffic ?? [];
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-          SizedBox(
-            height: 200,
-            child: BarChart(BarChartData(
-              titlesData: FlTitlesData(show: false), // ✅ pas de labels inutiles
-              gridData: FlGridData(show: false), // ✅ pas de grilles
-              barGroups: List.generate(
-                trafficData.length,
-                (i) => BarChartGroupData(
-                  x: i,
-                  barRods: [
-                    BarChartRodData(
-                      toY: ((trafficData[i]['value'] ?? 0) as num).toDouble(),
-                      color: Colors.cyan,
-                      width: 12,
-                      borderRadius: BorderRadius.circular(4),
-                    )
+  // Liste des alertes
+  Widget _alertsList(List<dynamic> alerts) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: alerts.length > 4 ? 4 : alerts.length,
+      separatorBuilder: (_, _) => const Divider(height: 16),
+      itemBuilder: (context, i) {
+        final a = alerts[i];
+        return Row(
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: _mapColor(a['color'] ?? "grey"),
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    a['text'] ?? "No text",
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    a['time'] ?? "",
+                    style: const TextStyle(
+                      color: Color(0xFF94A3B8),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Color(0xFF94A3B8), size: 18),
+          ],
+        );
+      },
+    );
+  }
+
+  // Liste des activités
+  Widget _activityList(List<dynamic> transactions) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: transactions.length > 4 ? 4 : transactions.length,
+      separatorBuilder: (_, _) => const Divider(height: 16),
+      itemBuilder: (context, i) {
+        final t = transactions[i];
+        return InkWell(
+          onTap: () => _showSaleDetails(t),
+          borderRadius: BorderRadius.circular(8),
+          child: Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF4361EE),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Sale Transaction • ${t['user']?['name'] ?? 'Unknown'}",
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      "\$${t['total'] ?? 0}",
+                      style: const TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),
-            )),
-          ),
-        ]),
-      ),
-    );
-  }
-
-  Widget _alertsCard(List<dynamic> alerts) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: alerts.length,
-          separatorBuilder: (_, __) => const Divider(),
-          itemBuilder: (context, i) {
-            final a = alerts[i];
-            return ListTile(
-              leading: Icon(Icons.warning, color: _mapColor(a['color'] ?? "grey")),
-              title: Text(a['text'] ?? "No text"),
-              subtitle: Text(a['time'] ?? ""),
-              trailing: const Icon(Icons.chevron_right),
-            );
-          },
-        ),
-      ),
-    );
-  }
-  Widget _activityCard(List<dynamic> transactions) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: transactions.length,
-          separatorBuilder: (_, __) => const Divider(), // ✅ ajoute un séparateur
-          itemBuilder: (context, i) {
-            final t = transactions[i];
-            return ListTile(
-              leading: const Icon(Icons.circle, color: Colors.blue, size: 10),
-              title: Text("Sale Transaction • ${t['user']?['name'] ?? 'Unknown'}"),
-              subtitle: Text("\$${t['total'] ?? 0}"),
-              trailing: SizedBox(
-                width: 100,
-                child: Text(
-                  t['created_at'] ?? "",
-                  textAlign: TextAlign.end,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+              Text(
+                _formatTime(t['created_at'] ?? ""),
+                style: const TextStyle(
+                  color: Color(0xFF94A3B8),
+                  fontSize: 11,
                 ),
               ),
-              onTap: () => _showSaleDetails(t),
-            );
-          },
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Formatage du temps
+  String _formatTime(String dateTime) {
+    if (dateTime.isEmpty) return "";
+    try {
+      if (dateTime.contains('T')) {
+        final timePart = dateTime.split('T')[1].substring(0, 5);
+        return timePart;
+      }
+      return dateTime;
+    } catch (e) {
+      return dateTime;
+    }
+  }
+
+  // Détails de la vente
+  void _showSaleDetails(Map<String, dynamic> vente) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Vente #${vente['id'] ?? ''}",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 8),
+            _buildDetailRow("Caissier", vente['user']?['name'] ?? 'Unknown'),
+            _buildDetailRow("Date", vente['created_at'] ?? ''),
+            _buildDetailRow("Total", "\$${vente['total'] ?? 0}"),
+            const SizedBox(height: 16),
+            const Text(
+              "Produits :",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            const SizedBox(height: 8),
+            ...(vente['lignes'] ?? []).map<Widget>((ligne) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      ligne['produit']?['nom'] ?? 'Produit inconnu',
+                      style: const TextStyle(fontSize: 13),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "${ligne['quantite'] ?? 0} x ${ligne['prix_unitaire'] ?? 0}",
+                      style: const TextStyle(fontSize: 13),
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "= ${ligne['sous_total'] ?? 0}",
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
+                ],
+              ),
+            )),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4361EE),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text("Fermer"),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  void _showSaleDetails(Map<String, dynamic> vente) {
-    showDialog(
-      context: navigatorKey.currentContext!,
-      builder: (_) => AlertDialog(
-        title: Text("Détails de la vente #${vente['id'] ?? ''}"),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Caissier : ${vente['user']?['name'] ?? 'Unknown'}"),
-              Text("Date : ${vente['created_at'] ?? ''}"),
-              Text("Total : \$${vente['total'] ?? 0}"),
-              const SizedBox(height: 12),
-              const Text("Produits :", style: TextStyle(fontWeight: FontWeight.bold)),
-              ...(vente['lignes'] ?? []).map<Widget>((ligne) => ListTile(
-                title: Text(ligne['produit']?['nom'] ?? 'Produit inconnu'),
-                subtitle: Text(
-                  "${ligne['quantite'] ?? 0} x ${ligne['prix_unitaire'] ?? 0} = ${ligne['sous_total'] ?? 0}",
-                ),
-                trailing: SizedBox(
-                  width: 80,
-                  child: Text(
-                    ligne['prix_unitaire']?.toString() ?? '',
-                    textAlign: TextAlign.end,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              )),
-            ],
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 70,
+            child: Text(
+              "$label :",
+              style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(navigatorKey.currentContext!),
-            child: const Text("Fermer"),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
     );
   }
 
-  // 🔹 Helper pour mapper les couleurs des alertes
+  // Mapper les couleurs
   Color _mapColor(String color) {
     switch (color.toLowerCase()) {
       case "red":
@@ -347,4 +861,4 @@ SingleChildScrollView(
         return Colors.grey;
     }
   }
-  }
+}

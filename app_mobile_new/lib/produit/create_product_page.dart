@@ -128,7 +128,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
               ),
 
               DropdownButtonFormField(
-                value: categorieId,
+                initialValue: categorieId,
                 decoration: const InputDecoration(labelText: "Catégorie"),
                 items: categories.map((c) {
                   return DropdownMenuItem(
@@ -141,7 +141,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
               ),
 
               DropdownButtonFormField(
-                value: fournisseurId,
+                initialValue: fournisseurId,
                 decoration: const InputDecoration(labelText: "Fournisseur"),
                 items: fournisseurs.map((f) {
                   return DropdownMenuItem(
