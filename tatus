@@ -1,0 +1,27 @@
+*   [33m0f9f607[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m, [m[1;31morigin/dev[m[33m)[m commit pour assurer le merge
+[31m|[m[32m\[m  
+[31m|[m * [33me755512[m modification du front et ajout de l'affichage des vente par employés
+[31m|[m * [33maec92e8[m modification du design et de la responsivité des pages principales
+[31m|[m * [33m5288811[m modification de la vue des cassiers, ajouts de redirection et de modal pour l'ajout des employés
+* [32m|[m [33mf10d1cd[m suppression e dossier
+* [32m|[m [33m712e4a9[m gestion du mobile
+[32m|[m[32m/[m  
+* [33mf9242fb[m ajout de lactivité recente
+*   [33mfa3e0e9[m resolution de conflit
+[33m|[m[34m\[m  
+[33m|[m * [33m160e6c1[m Ajout final
+* [34m|[m [33m071c284[m modification du front end avec ajout de fonctionnalité de réglage et de redirection
+[34m|[m[34m/[m  
+*   [33md529bcd[m Reééésolution de conflits
+[35m|[m[36m\[m  
+[35m|[m * [33m3473c33[m Modification du crud et gestion des employer
+* [36m|[m [33m6c4e5d8[m modification du front-end dashboard, inventory et sales
+[36m|[m[36m/[m  
+* [33m668ff15[m creaction du backend laravel
+* [33m644c60d[m creation du dossier frontend
+* [33m4e277da[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Adding "Document"
+* [33mac34628[m Delete Cahier_des_charges_L3(End).docx
+* [33m1b171d0[m Delete Maquette directory
+* [33m552b45d[m Add "Dossier Maquette"
+* [33me7134de[m Adding "Cahier des charges"
+* [33mdce8f19[m Initial commit
