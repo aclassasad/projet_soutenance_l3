@@ -128,7 +128,7 @@ class _EditProductPageState extends State<EditProductPage> {
               validator: (val) => val == null || val.isEmpty ? "Seuil requis" : null,
             ),
             DropdownButtonFormField(
-              value: categorieId,
+              initialValue: categorieId,
               decoration: const InputDecoration(labelText: "Catégorie"),
               items: widget.categories.map((c) {
                 return DropdownMenuItem(value: c["id"].toString(), child: Text(c["nom"]));
@@ -136,7 +136,7 @@ class _EditProductPageState extends State<EditProductPage> {
               onChanged: (val) => setState(() => categorieId = val),
             ),
             DropdownButtonFormField(
-              value: fournisseurId,
+              initialValue: fournisseurId,
               decoration: const InputDecoration(labelText: "Fournisseur"),
               items: widget.fournisseurs.map((f) {
                 return DropdownMenuItem(value: f["id"].toString(), child: Text(f["nom"]));
