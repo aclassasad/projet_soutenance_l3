@@ -16,17 +16,23 @@ class CaissierController extends Controller
     // Afficher dashboard (Point de Vente)
  
 
+// Dans CaissierController
 public function dashboard()
 {
     $user = auth()->user();
-    $entreprise = config('app.name');
 
-    // Date et heure du Bénin avec jour en français
+    // Vérifie que l'utilisateur est bien caissier
+    if ($user->role !== 'caissier') {
+        return redirect()->route('login')->withErrors('Accès interdit');
+    }
+
+    $entreprise = config('app.name');
     Carbon::setLocale('fr');
     $dateHeure = Carbon::now('Africa/Porto-Novo')->translatedFormat('l d/m/Y H:i:s');
 
     return view('caissier.dashboard', compact('user', 'entreprise', 'dateHeure'));
 }
+
     // Recherche produit AJAX
     public function recherche(Request $request)
     {
@@ -129,4 +135,6 @@ public function dashboard()
 
         return view('caissier.stats', compact('ventesJour', 'totalJour', 'produitsTop'));
     }
+
+    
 }

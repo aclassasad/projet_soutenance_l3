@@ -36,8 +36,13 @@
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" placeholder="Entrer votre adresse email" required value="{{ old('email') }}">
 
-                <label for="password">Mot de passe</label>
-                <input type="password" id="password" name="password" placeholder="Entrer votre mot de passe" required>
+                 <label for="password">Mot de passe</label>
+                <div class="password-container">
+                    <input type="password" id="password" name="password" placeholder="Entrer votre mot de passe" required>
+                    <span class="toggle-password" onclick="togglePassword()">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
 
                 @error('email')
                     <div class="text-danger small" style="color: red;">{{ $message }}</div>
@@ -51,4 +56,22 @@
         </div>
     </div>
 </body>
+
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById("password");
+    const icon = document.querySelector(".toggle-password i");
+    
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    } else {
+        passwordInput.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    }
+}
+</script>
+
 </html>

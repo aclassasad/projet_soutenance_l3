@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 
-class EmployeeController extends Controller
+class EmployesController extends Controller
 {
     public function stats()
     {

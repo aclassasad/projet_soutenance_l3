@@ -12,6 +12,13 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+
+        // ✅ Vérifie que l'utilisateur est admin ou gérant
+        if (!in_array($user->role, ['admin', 'gerant'])) {
+            return redirect()->route('login')->withErrors('Accès interdit');
+        }
+
         // Requête pour les ventes hebdomadaires
         $weeklySales = Vente::select(
                 DB::raw('DAYNAME(created_at) as day'),
@@ -23,7 +30,7 @@ class DashboardController extends Controller
             ->pluck('value','day'); // clé = jour, valeur = total
 
         // Liste fixe des jours de la semaine
-        $days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+        $days = ["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimande"];
 
         $weeklySalesLabels = $days;
         $weeklySalesData   = [];
@@ -40,10 +47,10 @@ class DashboardController extends Controller
             'produits_alertes' => Produit::whereColumn('stock', '<=', 'seuil_alerte')->count(),
             'produits_epuises' => Produit::where('stock', 0)->count(),
             'total_commandes' => Vente::count(),
-'transactions_recentes' => Vente::with('user') // relation vers le caissier
-    ->orderBy('created_at','desc')
-    ->take(5)
-    ->get(),
+            'transactions_recentes' => Vente::with('user') // relation vers le caissier
+                ->orderBy('created_at','desc')
+                ->take(5)
+                ->get(),
             // Graphique ventes hebdomadaires (7 jours fixes)
             'weekly_sales_labels' => $weeklySalesLabels,
             'weekly_sales_data'   => $weeklySalesData,

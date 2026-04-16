@@ -6,8 +6,8 @@
 <div class="container-fluid px-3 px-md-4">
     <!-- Header -->
     <div class="mb-4">
-        <h2 class="fw-bold mb-1">Sales Analytics</h2>
-        <p class="text-muted">Track your store's sales performance</p>
+        <h2 class="fw-bold mb-1">Statistiques de ventes</h2>
+        <p class="text-muted">Suivez les performances de vente de votre magasin</p>
     </div>
 
     <!-- KPIs - Responsive -->
@@ -16,7 +16,7 @@
             <div class="card border-0 shadow-sm h-100 hover-card">
                 <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
                     <div class="w-75 w-md-100 w-lg-75">
-                        <h6 class="text-muted small mb-1 mb-md-2">Total Revenue</h6>
+                        <h6 class="text-muted small mb-1 mb-md-2">Revenue Total</h6>
                         <h4 class="fw-bold mb-1 fs-5 fs-md-4">{{ number_format($stats['total_revenu'] ?? 297000, 0) }} <small class="fs-6">FCFA</small></h4>
                         <span class="text-success small">
                             <i class="fa-solid fa-arrow-up me-1"></i>+15.3%
@@ -36,7 +36,7 @@
             <div class="card border-0 shadow-sm h-100 hover-card">
                 <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
                     <div class="w-75 w-md-100 w-lg-75">
-                        <h6 class="text-muted small mb-1 mb-md-2">Total Orders</h6>
+                        <h6 class="text-muted small mb-1 mb-md-2">Commandes totales </h6>
                         <h4 class="fw-bold mb-1 fs-5 fs-md-4">{{ number_format($stats['total_commandes'] ?? 2220, 0) }}</h4>
                         <span class="text-success small">
                             <i class="fa-solid fa-arrow-up me-1"></i>+8.2%
@@ -53,7 +53,7 @@
             <div class="card border-0 shadow-sm h-100 hover-card">
                 <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
                     <div class="w-75 w-md-100 w-lg-75">
-                        <h6 class="text-muted small mb-1 mb-md-2">Avg. Order Value</h6>
+                        <h6 class="text-muted small mb-1 mb-md-2">Valeur moyenne des commandes</h6>
                         <h4 class="fw-bold mb-1 fs-5 fs-md-4">{{ number_format($stats['moyenne_commande'] ?? 133.78, 2) }} <small class="fs-6">FCFA</small></h4>
                         <span class="text-success small">
                             <i class="fa-solid fa-arrow-up me-1"></i>+6.5%
@@ -70,7 +70,7 @@
             <div class="card border-0 shadow-sm h-100 hover-card">
                 <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
                     <div class="w-75 w-md-100 w-lg-75">
-                        <h6 class="text-muted small mb-1 mb-md-2">Unique Customers</h6>
+                        <h6 class="text-muted small mb-1 mb-md-2">Clients uniques </h6>
                         <h4 class="fw-bold mb-1 fs-5 fs-md-4">{{ number_format($stats['clients_uniques'] ?? 1847, 0) }}</h4>
                         <span class="text-success small">
                             <i class="fa-solid fa-arrow-up me-1"></i>+12.1%
@@ -90,7 +90,7 @@
         <div class="col-12 col-lg-7">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-transparent border-0 pt-3 pt-md-4 px-3 px-md-4">
-                    <h5 class="fw-semibold mb-0">Revenue Trend</h5>
+                    <h5 class="fw-semibold mb-0">Tendance des revenus</h5>
                 </div>
                 <div class="card-body">
                     <div class="chart-container" style="position: relative; height: 250px; height-md: 300px; width: 100%;">
@@ -104,7 +104,7 @@
         <div class="col-12 col-lg-5">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-transparent border-0 pt-3 pt-md-4 px-3 px-md-4 d-flex justify-content-between align-items-center">
-                    <h5 class="fw-semibold mb-0">Sales by Category</h5>
+                    <h5 class="fw-semibold mb-0">Ventes par catégorie</h5>
                     <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#categoryLegend" aria-expanded="true">
                         <i class="fa-solid fa-chart-pie"></i>
                     </button>
@@ -137,7 +137,7 @@
         <div class="col-12 col-md-6">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-transparent border-0 pt-3 pt-md-4 px-3 px-md-4">
-                    <h5 class="fw-semibold mb-0">Monthly Transactions</h5>
+                    <h5 class="fw-semibold mb-0">Transactions mensuelles</h5>
                 </div>
                 <div class="card-body">
                     @php
@@ -161,7 +161,7 @@
                                 <div class="bg-primary rounded-3 mb-1 mx-auto" 
                                      style="width: 20px; width-md: 30px; height: {{ $barHeight }}px; background-color: #4361EE;"></div>
                                 <span class="small d-block text-truncate" style="max-width: 40px; max-width-md: 50px; font-size: 9px; font-size-md: 11px;">
-                                    {{ ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'][$index] }}
+                                    {{ ['Jan', 'Feb', 'Mar', 'Avr', 'Mai', 'Jun'][$index] }}
                                 </span>
                                 <span class="small text-muted d-block" style="font-size: 8px; font-size-md: 10px;">{{ $displayValue }}</span>
                             </div>
@@ -175,7 +175,7 @@
         <div class="col-12 col-md-6">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-transparent border-0 pt-3 pt-md-4 px-3 px-md-4">
-                    <h5 class="fw-semibold mb-0">Sales by Hour</h5>
+                    <h5 class="fw-semibold mb-0">Ventes par Heure</h5>
                 </div>
                 <div class="card-body">
                     @php
@@ -206,16 +206,16 @@
     <!-- Top Selling Products - Responsive -->
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-transparent border-0 pt-3 pt-md-4 px-3 px-md-4">
-            <h5 class="fw-semibold mb-0">Top Selling Products</h5>
+            <h5 class="fw-semibold mb-0">Produits les plus vendus</h5>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">RANK</th>
-                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">PRODUCT NAME</th>
-                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small text-end">UNITS SOLD</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">RANG </th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">NOM DU PRODUIT</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small text-end">UNITÉS VENDUES</th>
                             <th class="px-2 px-md-4 py-3 text-muted fw-semibold small text-end">REVENUE</th>
                             <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">PERFORMANCE</th>
                         </tr>

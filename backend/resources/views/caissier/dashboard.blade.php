@@ -103,9 +103,11 @@
                             <span class="fw-semibold" id="sousTotal">0 FCFA</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <!--<span class="text-muted">TVA (18%)</span>-->
+                            <span class="text-muted">TVA (18%)</span>
                             <span class="fw-semibold" id="tva">0 FCFA</span>
                         </div>
+
+                        
                         <hr>
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="fw-bold mb-0">Total</h5>
@@ -426,7 +428,7 @@ function afficherPanier() {
     });
     
     let tva = total * 0.18;
-    let totalTTC = total ;
+    let totalTTC = total + tva;
     
     document.getElementById("panier").innerHTML = html;
     document.getElementById("sousTotal").innerText = total.toLocaleString() + " FCFA";
