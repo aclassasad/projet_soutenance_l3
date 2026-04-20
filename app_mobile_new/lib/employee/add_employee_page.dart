@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'employee_service.dart';
+import '../theme_provider.dart';
 
 class AddEmployeePage extends StatefulWidget {
   const AddEmployeePage({super.key});
@@ -21,6 +22,28 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   String _role = "admin";
   String _statut = "1";
   bool loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ThemeProvider.instance.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    ThemeProvider.instance.removeListener(_onThemeChanged);
+    _nomController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   // Vérification email
   String? _validateEmail(String? value) {
@@ -102,22 +125,23 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = ThemeProvider.instance.themeMode == 'dark';
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
           "Ajouter un employé",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
         centerTitle: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF64748B)),
+          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -144,12 +168,12 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     "Nouvel employé",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -157,7 +181,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                     "Remplissez les informations ci-dessous",
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                     ),
                   ),
                 ],
@@ -167,11 +191,11 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
             // Formulaire
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
                     blurRadius: 10,
                     spreadRadius: 1,
                     offset: const Offset(0, 2),
@@ -196,16 +220,17 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(color: Color(0xFF4361EE), width: 1.5),
                           ),
                           contentPadding: const EdgeInsets.symmetric(vertical: 16),
                         ),
+                        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                         validator: (val) => val == null || val.isEmpty ? "Nom requis" : null,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Champ Email
                       TextFormField(
@@ -220,17 +245,18 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(color: Color(0xFF4361EE), width: 1.5),
                           ),
                           contentPadding: const EdgeInsets.symmetric(vertical: 16),
                         ),
+                        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                         validator: _validateEmail,
                         onChanged: (_) => setState(() {}),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Champ Mot de passe
                       TextFormField(
@@ -243,7 +269,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                           suffixIcon: IconButton(
                             icon: Icon(
                               _showPassword ? Icons.visibility_off : Icons.visibility,
-                              color: const Color(0xFF64748B),
+                              color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                             ),
                             onPressed: () => setState(() => _showPassword = !_showPassword),
                           ),
@@ -252,17 +278,18 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(color: Color(0xFF4361EE), width: 1.5),
                           ),
                           contentPadding: const EdgeInsets.symmetric(vertical: 16),
                         ),
+                        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                         onChanged: _checkPasswordStrength,
                         validator: (val) => val == null || val.isEmpty ? "Mot de passe requis" : null,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
 
                       // Barre de force du mot de passe
                       if (_passwordController.text.isNotEmpty) ...[
@@ -273,7 +300,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                                 borderRadius: BorderRadius.circular(8),
                                 child: LinearProgressIndicator(
                                   value: _strength / 5,
-                                  backgroundColor: Colors.grey.shade200,
+                                  backgroundColor: isDarkMode ? Colors.grey[800] : Colors.grey.shade200,
                                   color: _getStrengthColor(),
                                   minHeight: 6,
                                 ),
@@ -297,19 +324,19 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Padding(
                           padding: const EdgeInsets.only(left: 12),
                           child: Text(
                             "8+ caractères, majuscule, minuscule, chiffre, caractère spécial",
                             style: TextStyle(
                               fontSize: 10,
-                              color: Colors.grey[500],
+                              color: isDarkMode ? Colors.grey[500] : Colors.grey[500],
                             ),
                           ),
                         ),
                       ],
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Champ Confirmation mot de passe
                       TextFormField(
@@ -322,7 +349,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                           suffixIcon: IconButton(
                             icon: Icon(
                               _showConfirm ? Icons.visibility_off : Icons.visibility,
-                              color: const Color(0xFF64748B),
+                              color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                             ),
                             onPressed: () => setState(() => _showConfirm = !_showConfirm),
                           ),
@@ -331,27 +358,28 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(color: Color(0xFF4361EE), width: 1.5),
                           ),
                           contentPadding: const EdgeInsets.symmetric(vertical: 16),
                         ),
+                        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                         validator: _validateConfirm,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Rôle
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: DropdownButtonFormField(
-                          initialValue: _role,
+                        child: DropdownButtonFormField<String>(
+                          value: _role,
                           items: const [
-                            DropdownMenuItem(value: "admin", child: Text("Admin")),
+                            DropdownMenuItem(value: "admin", child: Text("Administrateur")),
                             DropdownMenuItem(value: "gerant", child: Text("Gérant")),
                             DropdownMenuItem(value: "caissier", child: Text("Caissier")),
                           ],
@@ -362,18 +390,20 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                           ),
+                          dropdownColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+                          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Statut
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: DropdownButtonFormField(
-                          initialValue: _statut,
+                        child: DropdownButtonFormField<String>(
+                          value: _statut,
                           items: const [
                             DropdownMenuItem(value: "1", child: Text("Actif")),
                             DropdownMenuItem(value: "0", child: Text("En congé")),
@@ -385,9 +415,11 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                           ),
+                          dropdownColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+                          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 28),
 
                       // Boutons
                       Row(
@@ -427,12 +459,14 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                             child: OutlinedButton(
                               onPressed: () => Navigator.pop(context),
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFF64748B),
+                                foregroundColor: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                                 padding: const EdgeInsets.symmetric(vertical: 14),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                side: BorderSide(color: Colors.grey.shade300),
+                                side: BorderSide(
+                                  color: isDarkMode ? const Color(0xFF475569) : Colors.grey.shade300,
+                                ),
                               ),
                               child: const Text(
                                 "Annuler",

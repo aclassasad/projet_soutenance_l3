@@ -2,59 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dashboard_service.dart';
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-Future<void> main() async {
-  const envFile = String.fromEnvironment('ENV', defaultValue: '.env.local');
-  await dotenv.load(fileName: envFile);
-  runApp(const SecureStoreApp());
-}
-
-class SecureStoreApp extends StatelessWidget {
-  const SecureStoreApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "SecureStore Pro",
-      navigatorKey: navigatorKey,
-      theme: ThemeData.light().copyWith(
-        primaryColor: const Color(0xFF4361EE),
-        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: false,
-          titleTextStyle: TextStyle(
-            color: Color(0xFF1E293B),
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-          iconTheme: IconThemeData(color: Color(0xFF64748B)),
-        ),
-        cardTheme: const CardThemeData(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-          ),
-          clipBehavior: Clip.antiAlias,
-        ),
-        colorScheme: const ColorScheme.light(
-          primary: Color(0xFF4361EE),
-          secondary: Color(0xFF06B6D4),
-          surface: Colors.white,
-        ),
-      ),
-      darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
-      initialRoute: "/dashboard",
-      routes: {
-        "/dashboard": (context) => const DashboardPage(),
-      },
-    );
-  }
-}
+import 'loading_widget.dart';
+import 'theme_provider.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -71,16 +20,32 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _loadDashboard();
+    // Écouter les changements de thème
+    ThemeProvider.instance.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    ThemeProvider.instance.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadDashboard() async {
     try {
       final data = await DashboardService.getDashboardStats();
+      debugPrint("Données reçues: ${data?.keys}");
       setState(() {
         stats = data;
         loading = false;
       });
     } catch (e) {
+      debugPrint("Erreur: $e");
       setState(() => loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -95,44 +60,34 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(color: Color(0xFF4361EE)),
-              const SizedBox(height: 16),
-              Text(
-                "Chargement du tableau de bord...",
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-            ],
-          ),
-        ),
+    if (loading || stats == null) {
+      return const LoadingWidget(
+        message: "Chargement du dashboard...",
+        backgroundColor: Color(0xFF4361EE),
       );
     }
 
     final isMobile = MediaQuery.of(context).size.width < 600;
+    final isDarkMode = ThemeProvider.instance.themeMode == 'dark';
 
     return Scaffold(
+      backgroundColor: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title:  const Text(
-              "Dashboard",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
-              ),
-            ),
+        title: const Text(
+          "Tableau de bord",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        elevation: 0,
+        centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {},
+            icon: Icon(Icons.refresh_outlined, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
+            onPressed: _loadDashboard,
+            tooltip: "Actualiser",
           ),
         ],
       ),
@@ -141,78 +96,127 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header avec bienvenue
-           
-            const SizedBox(height: 4),
-            Text(
-              "Welcome back! Here's what's happening today.",
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
+            // Message de bienvenue
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                "Bonjour ! Voici l'activité du jour.",
+                style: TextStyle(
+                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                  fontSize: 14,
+                ),
               ),
             ),
 
             const SizedBox(height: 24),
 
-            // Metrics Cards - Disposition verticale
-            const Text(
-              "Aperçu rapide",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1E293B),
+            // Section indicateurs clés
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4361EE),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Indicateurs clés",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 12),
             
-            // Cartes métriques les unes au-dessus des autres
+            // Cartes métriques
             _metricCard(
-              "Total Revenue",
-              "\$${stats?['total_revenu'] ?? 0}",
+              "Chiffre d'affaires",
+              "${_formatNumber(stats?['total_revenu'] ?? 0)} FCFA",
               "+12.5%",
               Icons.attach_money,
               const Color(0xFF10B981),
+              isDarkMode,
             ),
             const SizedBox(height: 12),
             
             _metricCard(
-              "Categories",
-              "${stats?['nombre_categories'] ?? 0}",
-              "⚠️ Low stock",
+              "Catégories",
+              "${_formatNumber(stats?['nombre_categories'] ?? 0)}",
+              "⚠️ Stock faible",
               Icons.category,
               const Color(0xFFF59E0B),
+              isDarkMode,
             ),
             const SizedBox(height: 12),
             
             _metricCard(
-              "Products in Stock",
-              "${stats?['total_produits_stock'] ?? 0}",
+              "Produits en stock",
+              "${_formatNumber(stats?['total_produits_stock'] ?? 0)}",
               "-3.2%",
               Icons.inventory,
               const Color(0xFF4361EE),
+              isDarkMode,
             ),
             const SizedBox(height: 12),
             
             _metricCard(
-              "Active Employees",
-              "${stats?['employes_actifs'] ?? 0}",
+              "Employés actifs",
+              "${_formatNumber(stats?['employes_actifs'] ?? 0)}",
               "+2",
               Icons.people,
               const Color(0xFF06B6D4),
+              isDarkMode,
             ),
 
             const SizedBox(height: 24),
 
-            // Graphiques
+            // Section graphiques
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4361EE),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Analyses",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
             if (isMobile) ...[
               _buildChartCard(
-                "Weekly Sales",
-                _lineChart(stats?['weekly_sales_data'] ?? [8000, 6000, 4000, 2000, 8500, 9500, 7000]),
+                "Ventes hebdomadaires",
+                _lineChart(isDarkMode),
+                isDarkMode,
               ),
               const SizedBox(height: 16),
               _buildChartCard(
-                "Store Traffic Today",
-                _barChart(stats?['store_traffic'] ?? []),
+                "Fréquentation du magasin",
+                _barChart(isDarkMode),
+                isDarkMode,
               ),
             ] else ...[
               Row(
@@ -220,15 +224,17 @@ class _DashboardPageState extends State<DashboardPage> {
                 children: [
                   Expanded(
                     child: _buildChartCard(
-                      "Weekly Sales",
-                      _lineChart(stats?['weekly_sales_data'] ?? [8000, 6000, 4000, 2000, 8500, 9500, 7000]),
+                      "Ventes hebdomadaires",
+                      _lineChart(isDarkMode),
+                      isDarkMode,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildChartCard(
-                      "Store Traffic Today",
-                      _barChart(stats?['store_traffic'] ?? []),
+                      "Fréquentation du magasin",
+                      _barChart(isDarkMode),
+                      isDarkMode,
                     ),
                   ),
                 ],
@@ -237,17 +243,45 @@ class _DashboardPageState extends State<DashboardPage> {
 
             const SizedBox(height: 24),
 
-            // Alertes et Activités
+            // Section alertes et activités
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4361EE),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Flux d'activité",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
             if (isMobile) ...[
               _buildSectionCard(
-                "Recent Alerts",
-                _alertsList(stats?['alerts'] ?? []),
+                "Alertes récentes",
+                _alertsList(isDarkMode),
+                isDarkMode,
                 showViewAll: true,
               ),
               const SizedBox(height: 16),
               _buildSectionCard(
-                "Recent Activity",
-                _activityList(stats?['transactions_recentes'] ?? []),
+                "Activité récente",
+                _activityList(isDarkMode),
+                isDarkMode,
                 showViewAll: true,
               ),
             ] else ...[
@@ -256,16 +290,18 @@ class _DashboardPageState extends State<DashboardPage> {
                 children: [
                   Expanded(
                     child: _buildSectionCard(
-                      "Recent Alerts",
-                      _alertsList(stats?['alerts'] ?? []),
+                      "Alertes récentes",
+                      _alertsList(isDarkMode),
+                      isDarkMode,
                       showViewAll: true,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildSectionCard(
-                      "Recent Activity",
-                      _activityList(stats?['transactions_recentes'] ?? []),
+                      "Activité récente",
+                      _activityList(isDarkMode),
+                      isDarkMode,
                       showViewAll: true,
                     ),
                   ),
@@ -278,16 +314,23 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // Carte pour les métriques - Version verticale avec largeur pleine
-  Widget _metricCard(String title, String value, String subtitle, IconData icon, Color color) {
+  String _formatNumber(dynamic value) {
+    if (value == null) return "0";
+    if (value is int) return value.toString();
+    if (value is double) return value.toStringAsFixed(0);
+    return value.toString();
+  }
+
+  // Carte métrique améliorée
+  Widget _metricCard(String title, String value, String subtitle, IconData icon, Color color, bool isDarkMode) {
     return Container(
-      width: double.infinity,  // Prend toute la largeur
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : color.withOpacity(0.1),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 2),
@@ -305,31 +348,43 @@ class _DashboardPageState extends State<DashboardPage> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                       fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     value,
-                    style: const TextStyle(
-                      fontSize: 24,
+                    style: TextStyle(
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: subtitle.contains('+') || subtitle.contains('⚠️')
-                          ? color
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: (subtitle.contains('+') || subtitle.contains('⚠️'))
+                          ? color.withOpacity(0.1)
                           : subtitle.contains('-')
-                              ? Colors.red
-                              : color,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                              ? Colors.red.withOpacity(0.1)
+                              : color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: (subtitle.contains('+') || subtitle.contains('⚠️'))
+                            ? color
+                            : subtitle.contains('-')
+                                ? Colors.red
+                                : color,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -337,13 +392,17 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(width: 16),
             Container(
-              width: 60,
-              height: 60,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [color, color.withOpacity(0.7)],
+                ),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, color: color, size: 30),
+              child: Icon(icon, color: Colors.white, size: 28),
             ),
           ],
         ),
@@ -352,14 +411,14 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   // Carte pour les graphiques
-  Widget _buildChartCard(String title, Widget chart) {
+  Widget _buildChartCard(String title, Widget chart, bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 2),
@@ -373,10 +432,10 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1E293B),
+                color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
               ),
             ),
             const SizedBox(height: 16),
@@ -390,10 +449,23 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // Graphique linéaire
-  Widget _lineChart(List<dynamic> data) {
-    final salesData = data.map((e) => (e as num).toDouble()).toList();
-    final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  // Graphique linéaire - avec données de test si nécessaire
+  Widget _lineChart(bool isDarkMode) {
+    // Récupérer les données ou utiliser des données de test
+    List<dynamic> weeklyData = stats?['weekly_sales_data'];
+    
+    if (weeklyData == null || weeklyData.isEmpty) {
+      // Données de test
+      weeklyData = [8000, 6000, 4000, 2000, 8500, 9500, 7000];
+    }
+    
+    final salesData = weeklyData.map((e) {
+      if (e is num) return e.toDouble();
+      if (e is String) return double.tryParse(e) ?? 0.0;
+      return 0.0;
+    }).toList();
+    
+    final days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
     return LineChart(
       LineChartData(
@@ -404,13 +476,14 @@ class _DashboardPageState extends State<DashboardPage> {
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                if (value >= 0 && value < days.length) {
+                final index = value.toInt();
+                if (index >= 0 && index < days.length) {
                   return Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
-                      days[value.toInt()],
-                      style: const TextStyle(
-                        color: Color(0xFF64748B),
+                      days[index],
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                         fontSize: 10,
                       ),
                     ),
@@ -442,7 +515,7 @@ class _DashboardPageState extends State<DashboardPage> {
               getDotPainter: (spot, percent, barData, index) {
                 return FlDotCirclePainter(
                   radius: 3,
-                  color: Colors.white,
+                  color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
                   strokeWidth: 2,
                   strokeColor: const Color(0xFF4361EE),
                 );
@@ -454,100 +527,105 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-// Graphique à barres - CORRIGÉ
-Widget _barChart(List<dynamic> traffic) {
-  // Vérifier si traffic est vide
-  if (traffic.isEmpty) {
-    return const Center(
-      child: Text(
-        "Aucune donnée disponible",
-        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
-      ),
-    );
-  }
+  // Graphique à barres - avec données de test si nécessaire
+  Widget _barChart(bool isDarkMode) {
+    List<dynamic> traffic = stats?['store_traffic'] ?? [];
+    
+    if (traffic.isEmpty) {
+      // Données de test
+      traffic = [
+        {'hour': '9AM', 'value': 160},
+        {'hour': '11AM', 'value': 120},
+        {'hour': '1PM', 'value': 80},
+        {'hour': '3PM', 'value': 40},
+        {'hour': '5PM', 'value': 140},
+        {'hour': '7PM', 'value': 90},
+      ];
+    }
 
-  // Extraire les valeurs et les heures de manière sécurisée
-  final List<double> values = [];
-  final List<String> hours = [];
+    final List<double> values = [];
+    final List<String> hours = [];
 
-  for (var item in traffic) {
-    if (item != null && item.containsKey('value') && item.containsKey('hour')) {
-      final value = item['value'];
-      final hour = item['hour'];
-      if (value != null && hour != null) {
-        values.add((value is num ? value : 0).toDouble());
-        hours.add(hour.toString());
+    for (var item in traffic) {
+      if (item is Map) {
+        var value = item['value'];
+        var hour = item['hour'];
+        if (value != null && hour != null) {
+          double numValue = 0;
+          if (value is num) numValue = value.toDouble();
+          else if (value is String) numValue = double.tryParse(value) ?? 0;
+          values.add(numValue);
+          hours.add(hour.toString());
+        }
       }
     }
-  }
 
-  // Vérifier si on a des données valides
-  if (values.isEmpty) {
-    return const Center(
-      child: Text(
-        "Données invalides",
-        style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+    if (values.isEmpty) {
+      return Center(
+        child: Text(
+          "Aucune donnée disponible",
+          style: TextStyle(color: isDarkMode ? Colors.grey[500] : const Color(0xFF94A3B8), fontSize: 12),
+        ),
+      );
+    }
+
+    return BarChart(
+      BarChartData(
+        gridData: FlGridData(show: false),
+        titlesData: FlTitlesData(
+          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                final index = value.toInt();
+                if (index >= 0 && index < hours.length) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      hours[index],
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
+                        fontSize: 10,
+                      ),
+                    ),
+                  );
+                }
+                return const Text('');
+              },
+            ),
+          ),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        borderData: FlBorderData(show: false),
+        barGroups: List.generate(
+          values.length,
+          (i) => BarChartGroupData(
+            x: i,
+            barRods: [
+              BarChartRodData(
+                toY: values[i],
+                color: const Color(0xFF06B6D4),
+                width: 20,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  return BarChart(
-    BarChartData(
-      gridData: FlGridData(show: false),
-      titlesData: FlTitlesData(
-        leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        bottomTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            getTitlesWidget: (value, meta) {
-              final index = value.toInt();
-              if (index >= 0 && index < hours.length) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Text(
-                    hours[index],
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
-                      fontSize: 10,
-                    ),
-                  ),
-                );
-              }
-              return const Text('');
-            },
-          ),
-        ),
-        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      ),
-      borderData: FlBorderData(show: false),
-      barGroups: List.generate(
-        values.length,
-        (i) => BarChartGroupData(
-          x: i,
-          barRods: [
-            BarChartRodData(
-              toY: values[i],
-              color: const Color(0xFF06B6D4),
-              width: 20,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-  // Carte pour les sections (alertes, activités)
-  Widget _buildSectionCard(String title, Widget content, {bool showViewAll = false}) {
+  // Carte pour les sections
+  Widget _buildSectionCard(String title, Widget content, bool isDarkMode, {bool showViewAll = false}) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 2),
@@ -564,10 +642,10 @@ Widget _barChart(List<dynamic> traffic) {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E293B),
+                    color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                   ),
                 ),
                 if (showViewAll)
@@ -578,7 +656,7 @@ Widget _barChart(List<dynamic> traffic) {
                       minimumSize: const Size(50, 30),
                     ),
                     child: const Text(
-                      "View All",
+                      "Voir tout",
                       style: TextStyle(
                         color: Color(0xFF4361EE),
                         fontSize: 13,
@@ -596,12 +674,26 @@ Widget _barChart(List<dynamic> traffic) {
   }
 
   // Liste des alertes
-  Widget _alertsList(List<dynamic> alerts) {
+  Widget _alertsList(bool isDarkMode) {
+    List<dynamic> alerts = stats?['alerts'] ?? [];
+    
+    if (alerts.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            "Aucune alerte récente",
+            style: TextStyle(color: isDarkMode ? Colors.grey[500] : const Color(0xFF94A3B8)),
+          ),
+        ),
+      );
+    }
+
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: alerts.length > 4 ? 4 : alerts.length,
-      separatorBuilder: (_, _) => const Divider(height: 16),
+      separatorBuilder: (_, __) => const Divider(height: 16),
       itemBuilder: (context, i) {
         final a = alerts[i];
         return Row(
@@ -620,10 +712,11 @@ Widget _barChart(List<dynamic> traffic) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    a['text'] ?? "No text",
-                    style: const TextStyle(
+                    a['text'] ?? "Aucun message",
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -631,15 +724,15 @@ Widget _barChart(List<dynamic> traffic) {
                   const SizedBox(height: 2),
                   Text(
                     a['time'] ?? "",
-                    style: const TextStyle(
-                      color: Color(0xFF94A3B8),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF94A3B8),
                       fontSize: 11,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: Color(0xFF94A3B8), size: 18),
+            Icon(Icons.chevron_right, color: isDarkMode ? Colors.grey[400] : const Color(0xFF94A3B8), size: 18),
           ],
         );
       },
@@ -647,16 +740,30 @@ Widget _barChart(List<dynamic> traffic) {
   }
 
   // Liste des activités
-  Widget _activityList(List<dynamic> transactions) {
+  Widget _activityList(bool isDarkMode) {
+    List<dynamic> transactions = stats?['transactions_recentes'] ?? [];
+    
+    if (transactions.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            "Aucune activité récente",
+            style: TextStyle(color: isDarkMode ? Colors.grey[500] : const Color(0xFF94A3B8)),
+          ),
+        ),
+      );
+    }
+
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: transactions.length > 4 ? 4 : transactions.length,
-      separatorBuilder: (_, _) => const Divider(height: 16),
+      separatorBuilder: (_, __) => const Divider(height: 16),
       itemBuilder: (context, i) {
         final t = transactions[i];
         return InkWell(
-          onTap: () => _showSaleDetails(t),
+          onTap: () => _showSaleDetails(t, isDarkMode),
           borderRadius: BorderRadius.circular(8),
           child: Row(
             children: [
@@ -674,19 +781,20 @@ Widget _barChart(List<dynamic> traffic) {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Sale Transaction • ${t['user']?['name'] ?? 'Unknown'}",
-                      style: const TextStyle(
+                      "Vente • ${t['user']?['name'] ?? 'Inconnu'}",
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
+                        color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      "\$${t['total'] ?? 0}",
-                      style: const TextStyle(
-                        color: Color(0xFF64748B),
+                      "${_formatNumber(t['total'])} FCFA",
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                         fontSize: 12,
                       ),
                     ),
@@ -695,8 +803,8 @@ Widget _barChart(List<dynamic> traffic) {
               ),
               Text(
                 _formatTime(t['created_at'] ?? ""),
-                style: const TextStyle(
-                  color: Color(0xFF94A3B8),
+                style: TextStyle(
+                  color: isDarkMode ? Colors.grey[500] : const Color(0xFF94A3B8),
                   fontSize: 11,
                 ),
               ),
@@ -722,15 +830,15 @@ Widget _barChart(List<dynamic> traffic) {
   }
 
   // Détails de la vente
-  void _showSaleDetails(Map<String, dynamic> vente) {
+  void _showSaleDetails(Map<String, dynamic> vente, bool isDarkMode) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -742,22 +850,23 @@ Widget _barChart(List<dynamic> traffic) {
               children: [
                 Text(
                   "Vente #${vente['id'] ?? ''}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
             const Divider(),
             const SizedBox(height: 8),
-            _buildDetailRow("Caissier", vente['user']?['name'] ?? 'Unknown'),
-            _buildDetailRow("Date", vente['created_at'] ?? ''),
-            _buildDetailRow("Total", "\$${vente['total'] ?? 0}"),
+            _buildDetailRow("Caissier", vente['user']?['name'] ?? 'Inconnu', isDarkMode),
+            _buildDetailRow("Date", vente['created_at'] ?? '', isDarkMode),
+            _buildDetailRow("Total", "${_formatNumber(vente['total'])} FCFA", isDarkMode),
             const SizedBox(height: 16),
             const Text(
               "Produits :",
@@ -772,7 +881,7 @@ Widget _barChart(List<dynamic> traffic) {
                     flex: 3,
                     child: Text(
                       ligne['produit']?['nom'] ?? 'Produit inconnu',
-                      style: const TextStyle(fontSize: 13),
+                      style: TextStyle(fontSize: 13, color: isDarkMode ? Colors.grey[300] : const Color(0xFF1E293B)),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -781,17 +890,18 @@ Widget _barChart(List<dynamic> traffic) {
                     flex: 2,
                     child: Text(
                       "${ligne['quantite'] ?? 0} x ${ligne['prix_unitaire'] ?? 0}",
-                      style: const TextStyle(fontSize: 13),
+                      style: TextStyle(fontSize: 13, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
                       textAlign: TextAlign.end,
                     ),
                   ),
                   Expanded(
                     flex: 2,
                     child: Text(
-                      "= ${ligne['sous_total'] ?? 0}",
-                      style: const TextStyle(
+                      "= ${_formatNumber(ligne['sous_total'])}",
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
+                        color: isDarkMode ? Colors.grey[300] : const Color(0xFF1E293B),
                       ),
                       textAlign: TextAlign.end,
                     ),
@@ -821,7 +931,7 @@ Widget _barChart(List<dynamic> traffic) {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, String value, bool isDarkMode) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -830,13 +940,13 @@ Widget _barChart(List<dynamic> traffic) {
             width: 70,
             child: Text(
               "$label :",
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+              style: TextStyle(color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B), fontSize: 13),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: isDarkMode ? Colors.white : const Color(0xFF1E293B)),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

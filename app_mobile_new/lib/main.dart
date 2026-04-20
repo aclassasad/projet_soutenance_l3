@@ -51,95 +51,117 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Écouter les changements de thème
+    ThemeProvider.instance.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    ThemeProvider.instance.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ThemeProviderWidget(
-      child: MaterialApp(
-        title: 'SecureStore Pro',
-        debugShowCheckedModeBanner: false,
-        theme: _lightTheme,
-        darkTheme: _darkTheme,
-        themeMode: ThemeProvider.instance.getThemeMode(),
-        initialRoute: '/login',
-        routes: {
-          // Auth
-          '/login': (context) => const LoginPage(),
-          '/password-reset': (context) => const PasswordResetPage(),
-          '/verify-code': (context) => const VerifyCodePage(),
-          '/reset-password': (context) => const ResetPasswordPage(),
+    return MaterialApp(
+      title: 'SecureStore Pro',
+      debugShowCheckedModeBanner: false,
+      theme: _lightTheme,
+      darkTheme: _darkTheme,
+      themeMode: ThemeProvider.instance.getThemeMode(),
+      initialRoute: '/login',
+      routes: {
+        // Auth
+        '/login': (context) => const LoginPage(),
+        '/password-reset': (context) => const PasswordResetPage(),
+        '/verify-code': (context) => const VerifyCodePage(),
+        '/reset-password': (context) => const ResetPasswordPage(),
 
-          // Global
-          '/dashboard': (context) => AppLayout(child: const DashboardPage()),
-          '/inventory': (context) => AppLayout(child: const InventoryPage()),
-          '/notifications': (context) => AppLayout(child: const NotificationsPage()),
-          '/sales': (context) => AppLayout(child: const SalesPage()),
-          '/security': (context) => AppLayout(child: const SecurityPage()),
-          '/employees': (context) => AppLayout(child: const EmployeesPage()),
-          '/settings': (context) => AppLayout(child: const SettingsPage()),
+        // Global
+        '/dashboard': (context) => AppLayout(child: const DashboardPage()),
+        '/inventory': (context) => AppLayout(child: const InventoryPage()),
+        '/notifications': (context) => AppLayout(child: const NotificationsPage()),
+        '/sales': (context) => AppLayout(child: const SalesPage()),
+        '/security': (context) => AppLayout(child: const SecurityPage()),
+        '/employees': (context) => AppLayout(child: const EmployeesPage()),
+        '/settings': (context) => AppLayout(child: const SettingsPage()),
 
-          // Catégorie
-          '/categories': (context) => AppLayout(child: const CategoriesPage()),
-          '/categories/detail': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-            return AppLayout(child: CategoryDetailPage(categorie: args));
-          },
-          '/categories/create': (context) => AppLayout(child: const CreateCategoryPage()),
-          '/categories/edit': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-            return AppLayout(child: EditCategoryPage(categorie: args));
-          },
-
-          // Employé
-          '/employees/add': (context) => AppLayout(child: const AddEmployeePage()),
-          '/employees/edit': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-            return AppLayout(child: EditEmployeePage(user: args));
-          },
-          '/employees/detail': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-            return AppLayout(child: EmployeeDetailPage(user: args));
-          },
-
-          // Fournisseur
-          '/fournisseurs': (context) => AppLayout(child: const FournisseursPage()),
-          '/fournisseurs/detail': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-            return AppLayout(child: FournisseurDetailPage(fournisseur: args));
-          },
-          '/fournisseurs/create': (context) => AppLayout(child: const CreateFournisseurPage()),
-          '/fournisseurs/edit': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-            return AppLayout(child: EditFournisseurPage(fournisseur: args));
-          },
-
-          // Produit
-          '/produits': (context) => AppLayout(child: const ProductsPage()),
-          '/produits/detail': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-            return AppLayout(
-              child: ProductDetailPage(
-                produit: args["produit"] as Map<String, dynamic>,
-                categories: List<Map<String, dynamic>>.from(args["categories"] ?? []),
-                fournisseurs: List<Map<String, dynamic>>.from(args["fournisseurs"] ?? []),
-              ),
-            );
-          },
-          '/produits/create': (context) => AppLayout(child: const CreateProductPage()),
-          '/produits/edit': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-            return AppLayout(
-              child: EditProductPage(
-                produit: args["produit"] as Map<String, dynamic>,
-                categories: List<Map<String, dynamic>>.from(args["categories"] ?? []),
-                fournisseurs: List<Map<String, dynamic>>.from(args["fournisseurs"] ?? []),
-              ),
-            );
-          },
+        // Catégorie
+        '/categories': (context) => AppLayout(child: const CategoriesPage()),
+        '/categories/detail': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return AppLayout(child: CategoryDetailPage(categorie: args));
         },
-      ),
+        '/categories/create': (context) => AppLayout(child: const CreateCategoryPage()),
+        '/categories/edit': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return AppLayout(child: EditCategoryPage(categorie: args));
+        },
+
+        // Employé
+        '/employees/add': (context) => AppLayout(child: const AddEmployeePage()),
+        '/employees/edit': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return AppLayout(child: EditEmployeePage(user: args));
+        },
+        '/employees/detail': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return AppLayout(child: EmployeeDetailPage(user: args));
+        },
+
+        // Fournisseur
+        '/fournisseurs': (context) => AppLayout(child: const FournisseursPage()),
+        '/fournisseurs/detail': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return AppLayout(child: FournisseurDetailPage(fournisseur: args));
+        },
+        '/fournisseurs/create': (context) => AppLayout(child: const CreateFournisseurPage()),
+        '/fournisseurs/edit': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return AppLayout(child: EditFournisseurPage(fournisseur: args));
+        },
+
+        // Produit
+        '/produits': (context) => AppLayout(child: const ProductsPage()),
+        '/produits/detail': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return AppLayout(
+            child: ProductDetailPage(
+              produit: args["produit"] as Map<String, dynamic>,
+              categories: List<Map<String, dynamic>>.from(args["categories"] ?? []),
+              fournisseurs: List<Map<String, dynamic>>.from(args["fournisseurs"] ?? []),
+            ),
+          );
+        },
+        '/produits/create': (context) => AppLayout(child: const CreateProductPage()),
+        '/produits/edit': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return AppLayout(
+            child: EditProductPage(
+              produit: args["produit"] as Map<String, dynamic>,
+              categories: List<Map<String, dynamic>>.from(args["categories"] ?? []),
+              fournisseurs: List<Map<String, dynamic>>.from(args["fournisseurs"] ?? []),
+            ),
+          );
+        },
+      },
     );
   }
 

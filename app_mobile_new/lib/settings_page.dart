@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'settings_service.dart';
 import 'theme_provider.dart';
+import 'loading_widget.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -11,7 +12,6 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   Map<String, dynamic> settings = {
-    "language": "fr",
     "theme": "light",
     "email_notifications": true,
     "push_notifications": true,
@@ -23,6 +23,20 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     _loadSettings();
+    // Écouter les changements de thème
+    ThemeProvider.instance.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    ThemeProvider.instance.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadSettings() async {
@@ -64,36 +78,46 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  String _getLanguageLabel(String code) {
-    switch (code) {
-      case "fr": return "Français";
-      case "en": return "English";
-      default: return code;
+  // Animation de transition du thème
+  Future<void> _animateThemeTransition(String newTheme) async {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                newTheme == "dark" ? Icons.nightlight_round : Icons.light_mode,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  newTheme == "dark" 
+                      ? "Passage au mode sombre..." 
+                      : "Passage au mode clair...",
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(milliseconds: 800),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: const Color(0xFF4361EE),
+        ),
+      );
     }
+    await Future.delayed(const Duration(milliseconds: 200));
   }
 
   @override
   Widget build(BuildContext context) {
     // Récupérer le thème actuel via le ThemeProvider
-    final themeProvider = ThemeProvider.of(context);
-    final isDarkMode = themeProvider.themeMode == 'dark';
+    final isDarkMode = ThemeProvider.instance.themeMode == 'dark';
     
     if (loading) {
-      return Scaffold(
-        backgroundColor: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(color: Color(0xFF4361EE)),
-              const SizedBox(height: 16),
-              Text(
-                "Chargement des paramètres...",
-                style: TextStyle(color: isDarkMode ? Colors.grey[400] : Colors.grey[600]),
-              ),
-            ],
-          ),
-        ),
+      return const LoadingWidget(
+        message: "Chargement des paramètres...",
+        backgroundColor: Color(0xFF4361EE),
       );
     }
 
@@ -107,10 +131,11 @@ class _SettingsPageState extends State<SettingsPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
         centerTitle: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -176,58 +201,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               child: Column(
                 children: [
-                  // Langue
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade100,
-                        ),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.language_outlined, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
-                            const SizedBox(width: 12),
-                            Text(
-                              "Langue",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF4361EE).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: settings["language"],
-                              items: const [
-                                DropdownMenuItem(value: "fr", child: Text("Français")),
-                                DropdownMenuItem(value: "en", child: Text("English")),
-                              ],
-                              onChanged: (val) => setState(() => settings["language"] = val),
-                              style: const TextStyle(
-                                color: Color(0xFF4361EE),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
                   // Thème
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -269,10 +242,13 @@ class _SettingsPageState extends State<SettingsPage> {
                                 DropdownMenuItem(value: "dark", child: Text("Sombre")),
                               ],
                               onChanged: (val) async {
-                                setState(() => settings["theme"] = val);
-                                await SettingsService.saveSettings(settings);
-                                if (context.mounted) {
-                                  ThemeProvider.instance.toggleTheme();
+                                if (val != null && val != settings["theme"]) {
+                                  await _animateThemeTransition(val);
+                                  setState(() => settings["theme"] = val);
+                                  await SettingsService.saveSettings(settings);
+                                  if (context.mounted) {
+                                    ThemeProvider.instance.toggleTheme();
+                                  }
                                 }
                               },
                               style: const TextStyle(

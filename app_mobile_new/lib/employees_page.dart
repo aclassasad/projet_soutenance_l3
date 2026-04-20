@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'employee_service.dart';
+import 'loading_widget.dart';
+import 'theme_provider.dart';
 
 class EmployeesPage extends StatefulWidget {
   const EmployeesPage({super.key});
@@ -17,6 +19,20 @@ class _EmployeesPageState extends State<EmployeesPage> {
   void initState() {
     super.initState();
     _loadEmployees();
+    // Écouter les changements de thème
+    ThemeProvider.instance.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    ThemeProvider.instance.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadEmployees() async {
@@ -43,46 +59,35 @@ class _EmployeesPageState extends State<EmployeesPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(color: Color(0xFF4361EE)),
-              const SizedBox(height: 16),
-              Text(
-                "Chargement des employés...",
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-            ],
-          ),
-        ),
+    if (loading || stats == null) {
+      return const LoadingWidget(
+        message: "Chargement des employés...",
+        backgroundColor: Color(0xFF4361EE),
       );
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 600;
+    final isDarkMode = ThemeProvider.instance.themeMode == 'dark';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
-          "Employee Management",
+          "Gestion des employés",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_outlined, color: Color(0xFF64748B)),
+            icon: Icon(Icons.refresh_outlined, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
             onPressed: _loadEmployees,
+            tooltip: "Actualiser",
           ),
         ],
       ),
@@ -91,21 +96,38 @@ class _EmployeesPageState extends State<EmployeesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header avec titre et bouton d'ajout
-            if (isSmallScreen) ...[
-              const Text(
-                "Employee Management",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E293B),
-                ),
+            // En-tête avec titre et bouton d'ajout
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4361EE),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Gestion du personnel",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
+            ),
+            
+            if (isSmallScreen) ...[
+              const SizedBox(height: 8),
               Text(
-                "Manage your store's staff and schedules",
+                "Gérez votre équipe et leurs horaires",
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                   fontSize: 14,
                 ),
               ),
@@ -133,20 +155,12 @@ class _EmployeesPageState extends State<EmployeesPage> {
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
+                      const SizedBox(height: 4),
                       Text(
-                        "Employee Management",
+                        "Gérez votre équipe et leurs horaires",
                         style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        "Manage your store's staff and schedules",
-                        style: TextStyle(
-                          color: Color(0xFF64748B),
+                          color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                           fontSize: 14,
                         ),
                       ),
@@ -176,64 +190,99 @@ class _EmployeesPageState extends State<EmployeesPage> {
             const SizedBox(height: 24),
 
             // Titre des statistiques
-            const Text(
-              "Aperçu du personnel",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1E293B),
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4361EE),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Aperçu du personnel",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 12),
 
-            // Stats Cards - Disposition verticale
+            // Cartes statistiques
             _buildStatCard(
-              "Total Employees",
+              "Total employés",
               stats?['total'] ?? 0,
               const Color(0xFF4361EE),
               Icons.people,
               "Tous les employés",
+              isDarkMode,
             ),
             const SizedBox(height: 12),
 
             _buildStatCard(
-              "Active Today",
+              "Présents aujourd'hui",
               stats?['actifs'] ?? 0,
               const Color(0xFF10B981),
               Icons.check_circle,
-              "Présents aujourd'hui",
+              "Employés actifs",
+              isDarkMode,
             ),
             const SizedBox(height: 12),
 
             _buildStatCard(
-              "On Leave",
+              "En congé",
               stats?['conges'] ?? 0,
               const Color(0xFFF59E0B),
               Icons.access_time,
-              "En congé",
+              "Absents aujourd'hui",
+              isDarkMode,
             ),
             const SizedBox(height: 12),
 
-            // Staff Directory
+            // Annuaire du personnel
             const SizedBox(height: 8),
-            const Text(
-              "Staff Directory",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1E293B),
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4361EE),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Annuaire du personnel",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 12),
 
             // Liste des employés
             employees.isEmpty
-                ? _buildEmptyState()
+                ? _buildEmptyState(isDarkMode)
                 : ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: employees.length,
-                    itemBuilder: (context, index) => _buildEmployeeCard(employees[index], index),
+                    itemBuilder: (context, index) => _buildEmployeeCard(employees[index], index, isDarkMode),
                   ),
           ],
         ),
@@ -241,15 +290,15 @@ class _EmployeesPageState extends State<EmployeesPage> {
     );
   }
 
-  Widget _buildStatCard(String title, int value, Color color, IconData icon, String subtitle) {
+  Widget _buildStatCard(String title, int value, Color color, IconData icon, String subtitle, bool isDarkMode) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : color.withOpacity(0.1),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 2),
@@ -266,26 +315,35 @@ class _EmployeesPageState extends State<EmployeesPage> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                       fontSize: 13,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     value.toString(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: color.withOpacity(0.8),
-                      fontSize: 11,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -296,10 +354,14 @@ class _EmployeesPageState extends State<EmployeesPage> {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [color, color.withOpacity(0.7)],
+                ),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: color, size: 26),
+              child: Icon(icon, color: Colors.white, size: 26),
             ),
           ],
         ),
@@ -307,7 +369,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
     );
   }
 
-  Widget _buildEmployeeCard(Map<String, dynamic> emp, int index) {
+  Widget _buildEmployeeCard(Map<String, dynamic> emp, int index, bool isDarkMode) {
     final colors = [
       const Color(0xFF4361EE), // Bleu
       const Color(0xFF10B981), // Vert
@@ -323,11 +385,11 @@ class _EmployeesPageState extends State<EmployeesPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.05),
             blurRadius: 5,
             spreadRadius: 1,
             offset: const Offset(0, 1),
@@ -367,16 +429,16 @@ class _EmployeesPageState extends State<EmployeesPage> {
                     children: [
                       Text(
                         name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Color(0xFF1E293B),
+                          color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
-                      _buildRoleBadge(emp['role'] ?? "inconnu"),
+                      _buildRoleBadge(emp['role'] ?? "inconnu", isDarkMode),
                     ],
                   ),
                 ),
@@ -388,17 +450,17 @@ class _EmployeesPageState extends State<EmployeesPage> {
                           color: const Color(0xFF10B981).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.circle, size: 8, color: Color(0xFF10B981)),
-                            SizedBox(width: 4),
+                            Icon(Icons.circle, size: 8, color: const Color(0xFF10B981)),
+                            const SizedBox(width: 4),
                             Text(
                               "Actif",
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,
-                                color: Color(0xFF10B981),
+                                color: const Color(0xFF10B981),
                               ),
                             ),
                           ],
@@ -410,11 +472,11 @@ class _EmployeesPageState extends State<EmployeesPage> {
                           color: Colors.grey.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.circle, size: 8, color: Colors.grey),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 4),
                             Text(
                               "En congé",
                               style: TextStyle(
@@ -430,17 +492,15 @@ class _EmployeesPageState extends State<EmployeesPage> {
             ),
 
             const SizedBox(height: 12),
-            const Divider(height: 1),
+            const Divider(height: 1, color: Colors.grey),
 
             // Informations de contact
             const SizedBox(height: 8),
-            _buildInfoRow(Icons.email, emp['email'] ?? "no-email@example.com"),
+            _buildInfoRow(Icons.email, emp['email'] ?? "no-email@example.com", isDarkMode),
             const SizedBox(height: 4),
-            _buildInfoRow(Icons.phone, emp['telephone'] ?? "(555) 123-4567"),
+            _buildInfoRow(Icons.access_time, emp['horaire'] ?? "Matin (8h-16h)", isDarkMode),
             const SizedBox(height: 4),
-            _buildInfoRow(Icons.access_time, emp['horaire'] ?? "Morning (8AM-4PM)"),
-            const SizedBox(height: 4),
-            _buildInfoRow(Icons.calendar_today, "Joined: ${emp['created_at'] ?? "N/A"}"),
+            _buildInfoRow(Icons.calendar_today, "Inscrit le: ${emp['created_at'] ?? "N/A"}", isDarkMode),
 
             const SizedBox(height: 12),
             // Actions
@@ -456,7 +516,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
                       arguments: emp,
                     );
                   },
-                  icon: const Icon(Icons.visibility_outlined, size: 20, color: Color(0xFF64748B)),
+                  icon: Icon(Icons.visibility_outlined, size: 20, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
                   tooltip: "Voir les détails",
                 ),
                 // Éditer
@@ -468,13 +528,13 @@ class _EmployeesPageState extends State<EmployeesPage> {
                       arguments: emp,
                     ).then((_) => _loadEmployees());
                   },
-                  icon: const Icon(Icons.edit_outlined, size: 20, color: Color(0xFF4361EE)),
+                  icon: Icon(Icons.edit_outlined, size: 20, color: isDarkMode ? Colors.grey[400] : const Color(0xFF4361EE)),
                   tooltip: "Modifier",
                 ),
                 // Supprimer
                 IconButton(
                   onPressed: () => _showDeleteConfirmation(emp),
-                  icon: const Icon(Icons.delete_outline, size: 20, color: Color(0xFFEF4444)),
+                  icon: Icon(Icons.delete_outline, size: 20, color: isDarkMode ? Colors.grey[400] : const Color(0xFFEF4444)),
                   tooltip: "Supprimer",
                 ),
               ],
@@ -485,7 +545,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
     );
   }
 
-  Widget _buildRoleBadge(String role) {
+  Widget _buildRoleBadge(String role, bool isDarkMode) {
     final roleLabels = {
       "admin": "Administrateur",
       "gerant": "Gérant",
@@ -516,17 +576,17 @@ class _EmployeesPageState extends State<EmployeesPage> {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
+  Widget _buildInfoRow(IconData icon, String text, bool isDarkMode) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: const Color(0xFF94A3B8)),
+        Icon(icon, size: 14, color: isDarkMode ? Colors.grey[500] : const Color(0xFF94A3B8)),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
-              color: Color(0xFF475569),
+              color: isDarkMode ? Colors.grey[400] : const Color(0xFF475569),
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -536,11 +596,11 @@ class _EmployeesPageState extends State<EmployeesPage> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 40),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -549,7 +609,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
           Icon(
             Icons.group_off_outlined,
             size: 64,
-            color: Colors.grey[300],
+            color: isDarkMode ? Colors.grey[600] : Colors.grey[300],
           ),
           const SizedBox(height: 16),
           Text(
@@ -557,7 +617,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: Colors.grey[600],
+              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
             ),
           ),
           const SizedBox(height: 8),
@@ -565,7 +625,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
             "Commencez par ajouter votre premier employé",
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[500],
+              color: isDarkMode ? Colors.grey[500] : Colors.grey[500],
             ),
           ),
           const SizedBox(height: 16),
@@ -591,20 +651,24 @@ class _EmployeesPageState extends State<EmployeesPage> {
   }
 
   Future<void> _showDeleteConfirmation(Map<String, dynamic> emp) async {
+    final isDarkMode = ThemeProvider.instance.themeMode == 'dark';
+    
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        title: Text(
           "Confirmer la suppression",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
           ),
         ),
         content: Text(
           "Voulez-vous vraiment supprimer ${emp['name']} ?",
-          style: const TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: 14, color: isDarkMode ? Colors.grey[300] : Colors.black87),
         ),
         actions: [
           TextButton(
@@ -612,7 +676,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
-            child: const Text("Annuler", style: TextStyle(fontSize: 14)),
+            child: Text("Annuler", style: TextStyle(fontSize: 14, color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),

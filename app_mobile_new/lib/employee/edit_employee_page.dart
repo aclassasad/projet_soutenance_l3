@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'employee_service.dart';
+import '../theme_provider.dart';
 
 class EditEmployeePage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -38,13 +39,22 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
     _emailController = TextEditingController(text: widget.user["email"]);
     _role = widget.user["role"] ?? "admin";
     _statut = widget.user["statut"]?.toString() ?? "1";
+    // Écouter les changements de thème
+    ThemeProvider.instance.addListener(_onThemeChanged);
   }
 
   @override
   void dispose() {
+    ThemeProvider.instance.removeListener(_onThemeChanged);
     _nameController.dispose();
     _emailController.dispose();
     super.dispose();
+  }
+
+  void _onThemeChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _updateEmployee() async {
@@ -94,26 +104,35 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
     return _roleColors[_role] ?? const Color(0xFF64748B);
   }
 
+  String _getInitials(String name) {
+    if (name.isEmpty) return "??";
+    final parts = name.split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     final name = widget.user["name"] ?? "Employé";
+    final isDarkMode = ThemeProvider.instance.themeMode == 'dark';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
           "Modifier l'employé",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
         centerTitle: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF64748B)),
+          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -146,10 +165,10 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                   const SizedBox(height: 12),
                   Text(
                     name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -204,11 +223,11 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
             // Formulaire
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
                     blurRadius: 10,
                     spreadRadius: 1,
                     offset: const Offset(0, 2),
@@ -233,16 +252,17 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(color: Color(0xFF4361EE), width: 1.5),
                           ),
                           contentPadding: const EdgeInsets.symmetric(vertical: 16),
                         ),
+                        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                         validator: (val) => val == null || val.isEmpty ? "Nom requis" : null,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Champ Email
                       TextFormField(
@@ -257,13 +277,14 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(color: Color(0xFF4361EE), width: 1.5),
                           ),
                           contentPadding: const EdgeInsets.symmetric(vertical: 16),
                         ),
+                        style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                         validator: (val) {
                           if (val == null || val.isEmpty) return "Email requis";
                           final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
@@ -271,16 +292,16 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Rôle
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: DropdownButtonFormField<String>(
-                          initialValue: _role,
+                          value: _role,
                           items: const [
                             DropdownMenuItem(value: "admin", child: Text("Administrateur")),
                             DropdownMenuItem(value: "gerant", child: Text("Gérant")),
@@ -293,18 +314,20 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                           ),
+                          dropdownColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+                          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // Statut
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: DropdownButtonFormField<String>(
-                          initialValue: _statut,
+                          value: _statut,
                           items: const [
                             DropdownMenuItem(value: "1", child: Text("Actif")),
                             DropdownMenuItem(value: "0", child: Text("En congé")),
@@ -316,9 +339,11 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                           ),
+                          dropdownColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+                          style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 28),
 
                       // Boutons
                       Row(
@@ -358,12 +383,14 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
                             child: OutlinedButton(
                               onPressed: () => Navigator.pop(context),
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFF64748B),
+                                foregroundColor: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                                 padding: const EdgeInsets.symmetric(vertical: 14),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                side: BorderSide(color: Colors.grey.shade300),
+                                side: BorderSide(
+                                  color: isDarkMode ? const Color(0xFF475569) : Colors.grey.shade300,
+                                ),
                               ),
                               child: const Text(
                                 "Annuler",
@@ -385,14 +412,5 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
         ),
       ),
     );
-  }
-
-  String _getInitials(String name) {
-    if (name.isEmpty) return "??";
-    final parts = name.split(' ');
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    }
-    return name.substring(0, name.length >= 2 ? 2 : 1).toUpperCase();
   }
 }

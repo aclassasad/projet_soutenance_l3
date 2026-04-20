@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'sales_service.dart';
+import 'loading_widget.dart';
+import 'theme_provider.dart';
 
 class SalesPage extends StatefulWidget {
   const SalesPage({super.key});
@@ -20,6 +22,20 @@ class _SalesPageState extends State<SalesPage> {
   void initState() {
     super.initState();
     _loadSalesData();
+    // Écouter les changements de thème
+    ThemeProvider.instance.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    ThemeProvider.instance.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadSalesData() async {
@@ -51,43 +67,33 @@ class _SalesPageState extends State<SalesPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(color: Color(0xFF4361EE)),
-              const SizedBox(height: 16),
-              Text(
-                "Chargement des statistiques...",
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-            ],
-          ),
-        ),
+    final isDarkMode = ThemeProvider.instance.themeMode == 'dark';
+    
+    if (loading || stats == null) {
+      return const LoadingWidget(
+        message: "Chargement des ventes...",
+        backgroundColor: Color(0xFF4361EE),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
-          "Sales Analytics",
+          "Analyses des ventes",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_outlined, color: Color(0xFF64748B)),
+            icon: Icon(Icons.refresh_outlined, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
             onPressed: _loadSalesData,
+            tooltip: "Actualiser",
           ),
         ],
       ),
@@ -98,117 +104,176 @@ class _SalesPageState extends State<SalesPage> {
           children: [
             // Sous-titre
             Text(
-              "Track your store's sales performance",
+              "Suivez les performances de vos ventes",
               style: TextStyle(
-                color: Colors.grey[600],
+                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                 fontSize: 14,
               ),
             ),
 
             const SizedBox(height: 20),
 
-            // KPIs - Disposition verticale
-            const Text(
-              "Aperçu des ventes",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1E293B),
+            // Section indicateurs clés
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4361EE),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Indicateurs clés",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 12),
 
             _buildKpiCard(
-              "Total Revenue",
-              "\$${_formatNumber(stats?['total_revenu'] ?? 0)}",
+              "Chiffre d'affaires",
+              "${_formatNumber(stats?['total_revenu'] ?? 0)} FCFA",
               "+15.3%",
               Icons.attach_money,
               const Color(0xFF4361EE),
+              isDarkMode,
             ),
             const SizedBox(height: 10),
 
             _buildKpiCard(
-              "Total Orders",
+              "Commandes totales",
               _formatNumber(stats?['total_commandes'] ?? 0),
               "+8.2%",
               Icons.shopping_cart,
               const Color(0xFF06B6D4),
+              isDarkMode,
             ),
             const SizedBox(height: 10),
 
             _buildKpiCard(
-              "Avg. Order Value",
-              "\$${_formatNumber(stats?['moyenne_commande'] ?? 0)}",
+              "Panier moyen",
+              "${_formatNumber(stats?['moyenne_commande'] ?? 0)} FCFA",
               "+6.5%",
               Icons.receipt,
               const Color(0xFF10B981),
+              isDarkMode,
             ),
             const SizedBox(height: 10),
 
             _buildKpiCard(
-              "Unique Customers",
+              "Clients uniques",
               _formatNumber(stats?['clients_uniques'] ?? 0),
               "+12.1%",
               Icons.people,
               const Color(0xFFF59E0B),
+              isDarkMode,
             ),
 
             const SizedBox(height: 24),
 
-            // Revenue Trend Chart
-            _buildSectionTitle("Revenue Trend"),
-            const SizedBox(height: 12),
-            _buildChartCard(
-              _buildLineChart(),
+            // Section graphiques
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4361EE),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Tendances",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(height: 12),
+
+            _buildChartCard(_buildLineChart(isDarkMode), isDarkMode),
 
             const SizedBox(height: 24),
 
-            // Sales by Category - Version mobile optimisée
-            _buildSectionTitle("Sales by Category"),
+            // Section ventes par catégorie
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4361EE),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Ventes par catégorie",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 12),
-            _buildMobileCategoryChart(),
+
+            _buildMobileCategoryChart(isDarkMode),
 
             const SizedBox(height: 24),
 
-            // Top Selling Products
-            _buildSectionTitle("Top Selling Products"),
+            // Section top produits
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4361EE),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Produits les plus vendus",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 12),
-            _buildTopProductsCard(),
+
+            _buildTopProductsCard(isDarkMode),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF1E293B),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: const Color(0xFF4361EE).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Text(
-            "Cette année",
-            style: TextStyle(
-              fontSize: 11,
-              color: Color(0xFF4361EE),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -228,15 +293,16 @@ class _SalesPageState extends State<SalesPage> {
     String subtitle,
     IconData icon,
     Color color,
+    bool isDarkMode,
   ) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : color.withOpacity(0.1),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 2),
@@ -253,9 +319,10 @@ class _SalesPageState extends State<SalesPage> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                       fontSize: 13,
+                      fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -263,10 +330,10 @@ class _SalesPageState extends State<SalesPage> {
                   const SizedBox(height: 6),
                   Text(
                     value,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -295,10 +362,14 @@ class _SalesPageState extends State<SalesPage> {
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [color, color.withOpacity(0.7)],
+                ),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, color: color, size: 26),
+              child: Icon(icon, color: Colors.white, size: 26),
             ),
           ],
         ),
@@ -306,14 +377,14 @@ class _SalesPageState extends State<SalesPage> {
     );
   }
 
-  Widget _buildChartCard(Widget chart) {
+  Widget _buildChartCard(Widget chart, bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 2),
@@ -330,17 +401,16 @@ class _SalesPageState extends State<SalesPage> {
     );
   }
 
-  Widget _buildLineChart() {
+  Widget _buildLineChart(bool isDarkMode) {
     if (revenueTrend.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           "Aucune donnée disponible",
-          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+          style: TextStyle(color: isDarkMode ? Colors.grey[500] : const Color(0xFF94A3B8), fontSize: 12),
         ),
       );
     }
 
-    // Créer les spots sans utiliser asMap()
     final spots = <FlSpot>[];
     for (int i = 0; i < revenueTrend.length; i++) {
       spots.add(FlSpot(
@@ -361,7 +431,7 @@ class _SalesPageState extends State<SalesPage> {
           horizontalInterval: interval,
           getDrawingHorizontalLine: (value) {
             return FlLine(
-              color: Colors.grey.shade200,
+              color: isDarkMode ? Colors.grey[800] : Colors.grey.shade200,
               strokeWidth: 1,
               dashArray: [5, 5],
             );
@@ -376,8 +446,8 @@ class _SalesPageState extends State<SalesPage> {
               getTitlesWidget: (value, meta) {
                 return Text(
                   value.toInt().toString(),
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                     fontSize: 10,
                   ),
                 );
@@ -395,8 +465,8 @@ class _SalesPageState extends State<SalesPage> {
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
                       mois.length > 3 ? mois.substring(0, 3) : mois,
-                      style: const TextStyle(
-                        color: Color(0xFF64748B),
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                         fontSize: 10,
                       ),
                     ),
@@ -425,7 +495,7 @@ class _SalesPageState extends State<SalesPage> {
               getDotPainter: (spot, percent, barData, index) {
                 return FlDotCirclePainter(
                   radius: 4,
-                  color: Colors.white,
+                  color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
                   strokeWidth: 2,
                   strokeColor: const Color(0xFF4361EE),
                 );
@@ -437,19 +507,18 @@ class _SalesPageState extends State<SalesPage> {
     );
   }
 
-  // Version mobile optimisée pour Sales by Category
-  Widget _buildMobileCategoryChart() {
+  Widget _buildMobileCategoryChart(bool isDarkMode) {
     if (categories.isEmpty) {
       return Container(
         height: 200,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
             "Aucune donnée disponible",
-            style: TextStyle(color: Color(0xFF94A3B8)),
+            style: TextStyle(color: isDarkMode ? Colors.grey[500] : const Color(0xFF94A3B8)),
           ),
         ),
       );
@@ -457,26 +526,24 @@ class _SalesPageState extends State<SalesPage> {
 
     final total = categories.fold(0.0, (sum, c) => sum + ((c['revenu'] as num?)?.toDouble() ?? 0));
     
-    // Palette de couleurs harmonisée
     final colors = [
-      const Color(0xFF4361EE), // Bleu
-      const Color(0xFF06B6D4), // Cyan
-      const Color(0xFF10B981), // Vert
-      const Color(0xFFF59E0B), // Orange
-      const Color(0xFFEF4444), // Rouge
-      const Color(0xFF8B5CF6), // Violet
+      const Color(0xFF4361EE),
+      const Color(0xFF06B6D4),
+      const Color(0xFF10B981),
+      const Color(0xFFF59E0B),
+      const Color(0xFFEF4444),
+      const Color(0xFF8B5CF6),
     ];
 
-    // Prendre les 5 premières catégories
     final displayedCategories = categories.take(5).toList();
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 2),
@@ -487,7 +554,6 @@ class _SalesPageState extends State<SalesPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Barres horizontales pour les catégories
             ...List.generate(displayedCategories.length, (index) {
               final category = displayedCategories[index];
               final value = (category['revenu'] as num?)?.toDouble() ?? 0;
@@ -498,7 +564,6 @@ class _SalesPageState extends State<SalesPage> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Row(
                   children: [
-                    // Indicateur de couleur
                     Container(
                       width: 12,
                       height: 12,
@@ -509,14 +574,14 @@ class _SalesPageState extends State<SalesPage> {
                     ),
                     const SizedBox(width: 10),
                     
-                    // Nom de la catégorie
                     SizedBox(
                       width: 100,
                       child: Text(
                         category['nom'] ?? "Sans nom",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
+                          color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -525,7 +590,6 @@ class _SalesPageState extends State<SalesPage> {
                     
                     const SizedBox(width: 10),
                     
-                    // Barre de progression
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,13 +599,13 @@ class _SalesPageState extends State<SalesPage> {
                               Container(
                                 height: 8,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
+                                  color: isDarkMode ? Colors.grey[800] : Colors.grey.shade200,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
                               Container(
                                 height: 8,
-                                width: percentage * 2.5, // Échelle pour mobile
+                                width: percentage * 2.5,
                                 decoration: BoxDecoration(
                                   color: color,
                                   borderRadius: BorderRadius.circular(4),
@@ -555,17 +619,17 @@ class _SalesPageState extends State<SalesPage> {
                             children: [
                               Text(
                                 "${percentage.toStringAsFixed(1)}%",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF1E293B),
+                                  color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                                 ),
                               ),
                               Text(
-                                "\$${value.toStringAsFixed(0)}",
-                                style: const TextStyle(
+                                "${value.toStringAsFixed(0)} FCFA",
+                                style: TextStyle(
                                   fontSize: 10,
-                                  color: Color(0xFF64748B),
+                                  color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                                 ),
                               ),
                             ],
@@ -583,9 +647,9 @@ class _SalesPageState extends State<SalesPage> {
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   "+ ${categories.length - 5} autres catégories",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF64748B),
+                    color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -593,30 +657,29 @@ class _SalesPageState extends State<SalesPage> {
               
             const SizedBox(height: 8),
             
-            // Total
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF4361EE).withOpacity(0.05),
+                color: const Color(0xFF4361EE).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     "Total des ventes",
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E293B),
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                     ),
                   ),
                   Text(
-                    "\$${total.toStringAsFixed(0)}",
-                    style: const TextStyle(
+                    "${total.toStringAsFixed(0)} FCFA",
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF4361EE),
+                      color: const Color(0xFF4361EE),
                     ),
                   ),
                 ],
@@ -628,14 +691,14 @@ class _SalesPageState extends State<SalesPage> {
     );
   }
 
-  Widget _buildTopProductsCard() {
+  Widget _buildTopProductsCard(bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 2),
@@ -647,33 +710,31 @@ class _SalesPageState extends State<SalesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // En-tête du tableau
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Colors.grey.shade200),
+                  bottom: BorderSide(color: isDarkMode ? Colors.grey[800]! : Colors.grey.shade200),
                 ),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Expanded(flex: 1, child: Text("Rank", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Color(0xFF64748B)))),
-                  Expanded(flex: 3, child: Text("Product", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Color(0xFF64748B)))),
-                  Expanded(flex: 2, child: Text("Sold", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Color(0xFF64748B)))),
-                  Expanded(flex: 2, child: Text("Revenue", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Color(0xFF64748B)))),
+                  Expanded(flex: 1, child: Text("Rang", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)))),
+                  Expanded(flex: 3, child: Text("Produit", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)))),
+                  Expanded(flex: 2, child: Text("Vendus", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)))),
+                  Expanded(flex: 2, child: Text("Chiffre", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)))),
                 ],
               ),
             ),
 
-            // Lignes du tableau
             ...topProducts.isEmpty 
               ? [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
                     child: Center(
                       child: Text(
                         "Aucun produit trouvé",
-                        style: TextStyle(color: Color(0xFF94A3B8)),
+                        style: TextStyle(color: isDarkMode ? Colors.grey[500] : const Color(0xFF94A3B8)),
                       ),
                     ),
                   )
@@ -686,7 +747,7 @@ class _SalesPageState extends State<SalesPage> {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     decoration: BoxDecoration(
                       border: index < (topProducts.length > 5 ? 4 : topProducts.length - 1)
-                          ? Border(bottom: BorderSide(color: Colors.grey.shade100))
+                          ? Border(bottom: BorderSide(color: isDarkMode ? Colors.grey[800]! : Colors.grey.shade100))
                           : null,
                     ),
                     child: Row(
@@ -718,7 +779,7 @@ class _SalesPageState extends State<SalesPage> {
                                           ? Colors.grey
                                           : index == 2
                                               ? Colors.brown
-                                              : const Color(0xFF64748B),
+                                              : (isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
                                 ),
                               ),
                             ),
@@ -728,9 +789,10 @@ class _SalesPageState extends State<SalesPage> {
                           flex: 3,
                           child: Text(
                             p['nom'] ?? "Sans nom",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
+                              color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -740,20 +802,20 @@ class _SalesPageState extends State<SalesPage> {
                           flex: 2,
                           child: Text(
                             "${p['units'] ?? 0}",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF64748B),
+                              color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                             ),
                           ),
                         ),
                         Expanded(
                           flex: 2,
                           child: Text(
-                            "\$${revenue.toStringAsFixed(0)}",
-                            style: const TextStyle(
+                            "${revenue.toStringAsFixed(0)} FCFA",
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF10B981),
+                              color: const Color(0xFF10B981),
                             ),
                           ),
                         ),

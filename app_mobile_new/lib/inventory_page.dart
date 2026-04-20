@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'inventory_service.dart';
+import 'loading_widget.dart';
+import 'theme_provider.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -22,6 +24,20 @@ class _InventoryPageState extends State<InventoryPage> {
   void initState() {
     super.initState();
     _loadInitialData();
+    // Écouter les changements de thème
+    ThemeProvider.instance.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    ThemeProvider.instance.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadInitialData() async {
@@ -112,9 +128,9 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   String _getStatusText(int stock) {
-    if (stock <= 0) return "OUT OF STOCK";
-    if (stock < 10) return "LOW STOCK";
-    return "IN STOCK";
+    if (stock <= 0) return "RUPTURE";
+    if (stock < 10) return "STOCK FAIBLE";
+    return "EN STOCK";
   }
 
   Color _getStatusColor(int stock) {
@@ -126,45 +142,37 @@ class _InventoryPageState extends State<InventoryPage> {
   @override
   Widget build(BuildContext context) {
     if (loading || stats == null) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(color: Color(0xFF4361EE)),
-              const SizedBox(height: 16),
-              Text(
-                "Chargement de l'inventaire...",
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-            ],
-          ),
-        ),
+      return const LoadingWidget(
+        message: "Chargement de l'inventaire...",
+        backgroundColor: Color(0xFF4361EE),
       );
     }
 
+    final isDarkMode = ThemeProvider.instance.themeMode == 'dark';
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDarkMode ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
-          "Inventory Management",
+          "Gestion de l'inventaire",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Color(0xFF64748B)),
+            icon: Icon(Icons.notifications_outlined, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
             onPressed: () {},
+            tooltip: "Notifications",
           ),
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: Color(0xFF64748B)),
+            icon: Icon(Icons.settings_outlined, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
             onPressed: () {},
+            tooltip: "Paramètres",
           ),
         ],
       ),
@@ -179,9 +187,9 @@ class _InventoryPageState extends State<InventoryPage> {
                   children: [
                     // Sous-titre
                     Text(
-                      "Manage your store's product inventory",
+                      "Gérez l'inventaire de votre magasin",
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                         fontSize: 14,
                       ),
                     ),
@@ -189,84 +197,136 @@ class _InventoryPageState extends State<InventoryPage> {
                     const SizedBox(height: 20),
 
                     // Titre des métriques
-                    const Text(
-                      "Aperçu de l'inventaire",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1E293B),
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4361EE),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Aperçu de l'inventaire",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 12),
 
-                    // ✅ Metrics Cards - Disposition verticale
+                    // Cartes métriques
                     _buildMetricCard(
-                      title: "Total Products",
+                      title: "Produits totaux",
                       value: (stats?['total_produits'] ?? 0).toString(),
                       subtitle: "Tous les produits",
                       icon: Icons.inventory,
                       color: const Color(0xFF4361EE),
+                      isDarkMode: isDarkMode,
                     ),
                     const SizedBox(height: 12),
 
                     _buildMetricCard(
-                      title: "Low Stock Items",
+                      title: "Stock faible",
                       value: (stats?['low_stock'] ?? 0).toString(),
                       subtitle: "Produits en dessous du seuil",
                       icon: Icons.warning,
                       color: const Color(0xFFF59E0B),
+                      isDarkMode: isDarkMode,
                     ),
                     const SizedBox(height: 12),
 
                     _buildMetricCard(
-                      title: "Out of Stock",
+                      title: "Rupture de stock",
                       value: (stats?['out_of_stock'] ?? 0).toString(),
                       subtitle: "Produits en rupture",
                       icon: Icons.cancel,
                       color: Colors.red,
+                      isDarkMode: isDarkMode,
                     ),
                     const SizedBox(height: 12),
 
                     _buildMetricCard(
-                      title: "Total Value",
-                      value: "\$${(double.tryParse(stats?['valeur_totale']?.toString() ?? '0') ?? 0.0).toStringAsFixed(2)}",
+                      title: "Valeur totale",
+                      value: "${(double.tryParse(stats?['valeur_totale']?.toString() ?? '0') ?? 0.0).toStringAsFixed(2)} FCFA",
                       subtitle: "Valeur totale du stock",
                       icon: Icons.attach_money,
                       color: const Color(0xFF10B981),
+                      isDarkMode: isDarkMode,
                     ),
 
                     const SizedBox(height: 20),
 
-                    // 🔹 Section Recherche et Filtres
-                    const Text(
-                      "Recherche et filtres",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1E293B),
+                    // Section Recherche et Filtres
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4361EE),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Recherche et filtres",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 12),
 
-                    _buildSearchAndFilterSection(),
+                    _buildSearchAndFilterSection(isDarkMode),
 
                     const SizedBox(height: 20),
 
-                    // 🔹 Liste des produits
-                    const Text(
-                      "Liste des produits",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1E293B),
+                    // Liste des produits
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4361EE),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Catalogue produits",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 12),
 
-                    // Liste des produits avec hauteur fixe
+                    // Liste des produits
                     produits.isEmpty
-                        ? _buildEmptyState()
-                        : _buildProductList(),
+                        ? _buildEmptyState(isDarkMode)
+                        : _buildProductList(isDarkMode),
                   ],
                 ),
               ),
@@ -284,15 +344,16 @@ class _InventoryPageState extends State<InventoryPage> {
     required String subtitle,
     required IconData icon,
     required Color color,
+    required bool isDarkMode,
   }) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : color.withOpacity(0.1),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 2),
@@ -310,9 +371,10 @@ class _InventoryPageState extends State<InventoryPage> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
                       fontSize: 13,
+                      fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -320,23 +382,29 @@ class _InventoryPageState extends State<InventoryPage> {
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
+                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: color.withOpacity(0.8),
-                      fontSize: 11,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    child: Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -346,10 +414,14 @@ class _InventoryPageState extends State<InventoryPage> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [color, color.withOpacity(0.7)],
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: Icon(icon, color: Colors.white, size: 24),
             ),
           ],
         ),
@@ -358,15 +430,15 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   // Widget pour la section recherche et filtres
-  Widget _buildSearchAndFilterSection() {
+  Widget _buildSearchAndFilterSection(bool isDarkMode) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 2),
@@ -381,18 +453,18 @@ class _InventoryPageState extends State<InventoryPage> {
             TextField(
               decoration: InputDecoration(
                 hintText: "Rechercher un produit...",
-                hintStyle: const TextStyle(fontSize: 14),
-                prefixIcon: const Icon(Icons.search, size: 20, color: Color(0xFF64748B)),
+                hintStyle: TextStyle(fontSize: 14, color: isDarkMode ? Colors.grey[400] : Colors.grey[600]),
+                prefixIcon: Icon(Icons.search, size: 20, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 isDense: true,
               ),
-              style: const TextStyle(fontSize: 14),
+              style: TextStyle(fontSize: 14, color: isDarkMode ? Colors.white : Colors.black),
               onChanged: (val) {
                 searchText = val;
                 _loadInventory(search: searchText, categorieId: selectedCategory);
@@ -403,16 +475,19 @@ class _InventoryPageState extends State<InventoryPage> {
             // Filtre par catégorie
             Container(
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<int?>(
                   value: selectedCategory,
                   isExpanded: true,
-                  hint: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Text("Toutes les catégories", style: TextStyle(fontSize: 14)),
+                  hint: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      "Toutes les catégories",
+                      style: TextStyle(fontSize: 14, color: isDarkMode ? Colors.grey[400] : Colors.grey[600]),
+                    ),
                   ),
                   items: [
                     const DropdownMenuItem<int?>(
@@ -426,7 +501,7 @@ class _InventoryPageState extends State<InventoryPage> {
                       value: c['id'],
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(c['nom'] ?? '', style: const TextStyle(fontSize: 14)),
+                        child: Text(c['nom'] ?? '', style: TextStyle(fontSize: 14)),
                       ),
                     )),
                   ],
@@ -436,6 +511,7 @@ class _InventoryPageState extends State<InventoryPage> {
                     });
                     _loadInventory(search: searchText, categorieId: selectedCategory);
                   },
+                  dropdownColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
                 ),
               ),
             ),
@@ -444,15 +520,18 @@ class _InventoryPageState extends State<InventoryPage> {
             // Menu Mon gestionnaire
             Container(
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   isExpanded: true,
-                  hint: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Text("Mon gestionnaire", style: TextStyle(fontSize: 14)),
+                  hint: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      "Mon gestionnaire",
+                      style: TextStyle(fontSize: 14, color: isDarkMode ? Colors.grey[400] : Colors.grey[600]),
+                    ),
                   ),
                   items: const [
                     DropdownMenuItem(
@@ -480,6 +559,7 @@ class _InventoryPageState extends State<InventoryPage> {
                   onChanged: (val) {
                     if (val != null) Navigator.pushNamed(context, "/$val");
                   },
+                  dropdownColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
                 ),
               ),
             ),
@@ -490,7 +570,7 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   // Widget pour l'état vide
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(bool isDarkMode) {
     return SizedBox(
       height: 200,
       child: Center(
@@ -500,14 +580,15 @@ class _InventoryPageState extends State<InventoryPage> {
             Icon(
               Icons.inventory_2_outlined,
               size: 64,
-              color: Colors.grey[300],
+              color: isDarkMode ? Colors.grey[600] : Colors.grey[300],
             ),
             const SizedBox(height: 16),
             Text(
               "Aucun produit trouvé",
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey[500],
+                fontWeight: FontWeight.w500,
+                color: isDarkMode ? Colors.grey[400] : Colors.grey[500],
               ),
             ),
             const SizedBox(height: 8),
@@ -515,7 +596,7 @@ class _InventoryPageState extends State<InventoryPage> {
               "Modifiez vos critères de recherche",
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[400],
+                color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
               ),
             ),
           ],
@@ -525,7 +606,7 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   // Widget pour la liste des produits
-  Widget _buildProductList() {
+  Widget _buildProductList(bool isDarkMode) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -539,11 +620,11 @@ class _InventoryPageState extends State<InventoryPage> {
         return Container(
           margin: const EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.05),
+                color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.05),
                 blurRadius: 5,
                 spreadRadius: 1,
                 offset: const Offset(0, 1),
@@ -584,9 +665,10 @@ class _InventoryPageState extends State<InventoryPage> {
                       // Nom du produit
                       Text(
                         p['nom']?.toString() ?? "Sans nom",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 15,
+                          color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -601,14 +683,17 @@ class _InventoryPageState extends State<InventoryPage> {
                           _buildCompactChip(
                             Icons.category_outlined,
                             p['categorie']?['nom'] ?? 'N/A',
+                            isDarkMode,
                           ),
                           _buildCompactChip(
                             Icons.inventory_2_outlined,
                             "Stock: $stock",
+                            isDarkMode,
                           ),
                           _buildCompactChip(
                             Icons.attach_money_outlined,
-                            "\$${p['prix_vente'] ?? '0'}",
+                            "${p['prix_vente'] ?? '0'} FCFA",
+                            isDarkMode,
                           ),
                         ],
                       ),
@@ -663,7 +748,7 @@ class _InventoryPageState extends State<InventoryPage> {
                       _showDeleteConfirmation(p['id'], p['nom']);
                     }
                   },
-                  icon: const Icon(Icons.more_vert, size: 20, color: Color(0xFF64748B)),
+                  icon: Icon(Icons.more_vert, size: 20, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
                   itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: "edit",
@@ -698,23 +783,23 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   // Widget pour les chips compacts
-  Widget _buildCompactChip(IconData icon, String label) {
+  Widget _buildCompactChip(IconData icon, String label, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: const Color(0xFF64748B)),
+          Icon(icon, size: 12, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
           const SizedBox(width: 4),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
-              color: Color(0xFF64748B),
+              color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
             ),
             maxLines: 1,
           ),
@@ -724,17 +809,24 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   Future<void> _showDeleteConfirmation(int id, String nom) async {
+    final isDarkMode = ThemeProvider.instance.themeMode == 'dark';
+    
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        backgroundColor: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        title: Text(
           "Confirmer la suppression",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+          ),
         ),
         content: Text(
           "Voulez-vous vraiment supprimer le produit '$nom' ?",
-          style: const TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: 14, color: isDarkMode ? Colors.grey[300] : Colors.black87),
         ),
         actions: [
           TextButton(
@@ -742,7 +834,7 @@ class _InventoryPageState extends State<InventoryPage> {
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             ),
-            child: const Text("Annuler", style: TextStyle(fontSize: 14)),
+            child: Text("Annuler", style: TextStyle(fontSize: 14, color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () {
