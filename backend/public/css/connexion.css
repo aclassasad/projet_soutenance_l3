@@ -192,7 +192,7 @@ form input::placeholder {
 
     form input {
         margin-left: 60px;
-        width: 75%;
+        width: 100%;
     }
 
     form label {
@@ -213,4 +213,25 @@ form input::placeholder {
     border-radius: 50%;  /* arrondit les coins pour former un cercle */
     border: 3px; /* optionnel : ajoute une bordure */
     
+}
+
+
+
+.password-container {
+    position: relative;
+    width: 80%;
+}
+
+.password-container input {
+    width: 100%;
+    padding-right: 40px; /* espace pour l’icône */
+}
+
+.toggle-password {
+    position: absolute;
+    right: -40px;
+    top: 35%;
+    transform: translateY(-50%); /* centre verticalement */
+    cursor: pointer;
+    color: #666;
 }

@@ -8,7 +8,7 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
         <div>
             <h2 class="fw-bold mb-1">Dashboard</h2>
-            <h6 class="text-muted">Welcome back! Here's what's happening today.</h6>
+            <h6 class="text-muted"> Heureux de vous revoir ! Voici ce qui est prévu aujourd’hui.</h6>
         </div>
     </div>
 
@@ -20,7 +20,7 @@
                 <div class="card border-0 shadow-sm h-100 hover-card">
                     <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
                         <div class="w-75 w-md-100 w-lg-75">
-                            <h6 class="text-muted small mb-1 mb-md-2">Total Revenue</h6>
+                            <h6 class="text-muted small mb-1 mb-md-2">Revenue Total</h6>
                             <h4 class="fw-bold mb-1 fs-5 fs-md-4">{{ number_format($stats['total_revenu'] ?? 45231, 0, ',', ' ') }} <small class="fs-6">FCFA</small></h4>
                             <small class="text-success">
                                 <i class="fa-solid fa-arrow-up me-1"></i>+12.5%
@@ -63,7 +63,7 @@
                 <div class="card border-0 shadow-sm h-100 hover-card">
                     <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
                         <div class="w-75 w-md-100 w-lg-75">
-                            <h6 class="text-muted small mb-1 mb-md-2">Products in Stock</h6>
+                            <h6 class="text-muted small mb-1 mb-md-2">Produicts en Stock</h6>
                             <h4 class="fw-bold mb-1 fs-5 fs-md-4">{{ number_format($stats['total_produits_stock'] ?? 2847) }}</h4>
                             <small class="text-danger">
                                 <i class="fa-solid fa-arrow-down me-1"></i>-3.2%
@@ -83,7 +83,7 @@
                 <div class="card border-0 shadow-sm h-100 hover-card">
                     <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
                         <div class="w-75 w-md-100 w-lg-75">
-                            <h6 class="text-muted small mb-1 mb-md-2">Active Employees</h6>
+                            <h6 class="text-muted small mb-1 mb-md-2">Employees Actifs</h6>
                             <h4 class="fw-bold mb-1 fs-5 fs-md-4">{{ $stats['employes_actifs'] ?? 24 }}</h4>
                             <small class="text-success">
                                 <i class="fa-solid fa-arrow-up me-1"></i>+2
@@ -103,8 +103,8 @@
         <div class="col-12 col-lg-6">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="fw-semibold mb-3">Weekly Sales</h6>
-                    <div class="chart-container" style="position: relative; height: 250px; height-md: 300px; width: 100%;">
+                    <h6 class="fw-semibold mb-3">Ventes hebdomadaires</h6>
+                        <div class="chart-container" style="position: relative; height: 250px; height-md: 300px; width: 100%;">
                         <canvas id="weeklySales"></canvas>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
         <div class="col-12 col-lg-6">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="fw-semibold mb-3">Store Traffic Today</h6>
+                    <h6 class="fw-semibold mb-3">Trafic du magasin aujourd’hui </h6>
                     <div class="chart-container" style="position: relative; height: 250px; height-md: 300px; width: 100%;">
                         <canvas id="storeTraffic"></canvas>
                     </div>
@@ -127,7 +127,7 @@
         <div class="col-12 col-md-6">
             <div class="card h-100">
                 <div class="card-header bg-transparent border-0">
-                    <h6 class="fw-semibold mb-0">Recent Alerts</h6>
+                    <h6 class="fw-semibold mb-0">Alertes Récentes</h6>
                 </div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
@@ -167,7 +167,7 @@
         <div class="col-12 col-md-6">
             <div class="card h-100">
                 <div class="card-header bg-transparent border-0">
-                    <h6 class="fw-semibold mb-0">Recent Activity</h6>
+                    <h6 class="fw-semibold mb-0">Activité Récentes</h6>
                 </div>
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
@@ -177,7 +177,7 @@
                             <div class="flex-grow-1">
                                 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
                                     <p class="mb-0 small">
-                                        <span class="fw-semibold">Sale Transaction</span> • {{ $t->user->name }}
+                                        <span class="fw-semibold">Transaction de vente </span> • {{ $t->user->name }}
                                     </p>
                                     <small class="text-muted">{{ $t->created_at->format('d/m/Y H:i') }}</small>
                                 </div>
@@ -262,7 +262,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Données de secours avec la syntaxe PHP correcte
-    const weeklyLabels = {!! json_encode($stats['weekly_sales_labels'] ?? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']) !!};
+    const weeklyLabels = {!! json_encode($stats['weekly_sales_labels'] ?? ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']) !!};
     const weeklyData = {!! json_encode($stats['weekly_sales_data'] ?? [8000, 6000, 4000, 2000, 8500, 9500, 7000]) !!};
     
     // Pour store traffic, on vérifie si les données existent

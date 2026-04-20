@@ -84,22 +84,22 @@
       </li>
       <li class="nav-item mb-3">
         <a class="nav-link text-white {{ request()->routeIs('inventory') ? 'active' : '' }}" href="{{ route('inventory') }}">
-          <i class="bi bi-box-seam"></i> Inventory
+          <i class="bi bi-box-seam"></i> Inventaire
         </a>
       </li>
       <li class="nav-item mb-3">
         <a class="nav-link text-white {{ request()->routeIs('security') ? 'active' : '' }}" href="{{ route('security') }}">
-          <i class="bi bi-shield-lock"></i> Security
+          <i class="bi bi-shield-lock"></i> Sécurité
         </a>
       </li>
       <li class="nav-item mb-3">
         <a class="nav-link text-white {{ request()->routeIs('sales') ? 'active' : '' }}" href="{{ route('sales') }}">
-          <i class="bi bi-cart"></i> Sales
+          <i class="bi bi-cart"></i> Ventes
         </a>
       </li>
       <li class="nav-item mb-3">
         <a class="nav-link text-white {{ request()->routeIs('employees') ? 'active' : '' }}" href="{{ route('employees') }}">
-          <i class="bi bi-people"></i> Employees
+          <i class="bi bi-people"></i> Employer
         </a>
       </li>
     </ul>
@@ -111,12 +111,12 @@
         <span class="badge bg-danger">3</span>
       </a>
       <a href="{{ route('settings') }}" class="text-white d-block mb-2 text-decoration-none">
-        <i class="bi bi-gear"></i> Settings
+        <i class="bi bi-gear"></i> Paramètres
       </a>
       <form action="{{ route('logout') }}" method="POST">
         @csrf
         <button type="submit" class="btn btn-link text-danger text-decoration-none p-0">
-          <i class="bi bi-box-arrow-right"></i> Logout
+          <i class="bi bi-box-arrow-right"></i> Déconnexion
         </button>
       </form>
     </div>

@@ -7,8 +7,8 @@
     <!-- Header avec titre et description -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Employee Management</h2>
-            <p class="text-muted mb-0">Manage your store's staff and schedules</p>
+            <h2 class="fw-bold mb-1">Gestion du personnel</h2>
+            <p class="text-muted mb-0">Gestion du personnel et des horaires</p>
         </div>
         <div>
         <a href="{{ route('users.index') }}" class="btn btn-primary">
@@ -26,7 +26,7 @@
             <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #4361EE, #3A56D4);">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-white-50 mb-2">Total Employees</h6>
+                        <h6 class="text-white-50 mb-2">Nombre total d’employés</h6>
                         <h3 class="fw-bold mb-0 text-white">{{ $stats['total'] ?? 0 }}</h3>
                     </div>
                     <div class="bg-white bg-opacity-20 rounded-3 p-3">
@@ -40,7 +40,7 @@
             <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #10b981, #0f9d6e);">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-white-50 mb-2">Active Today</h6>
+                        <h6 class="text-white-50 mb-2">Employés actifs aujourd’hui </h6>
                         <h3 class="fw-bold mb-0 text-white">{{ $stats['actifs'] ?? 0 }}</h3>
                     </div>
                     <div class="bg-white bg-opacity-20 rounded-3 p-3">
@@ -54,7 +54,7 @@
             <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #184E77, #76C893);">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-white-50 mb-2">On Leave</h6>
+                        <h6 class="text-white-50 mb-2">En congé</h6>
                         <h3 class="fw-bold mb-0 text-white">{{ $stats['conges'] ?? 0 }}</h3>
                     </div>
                     <div class="bg-white bg-opacity-20 rounded-3 p-3">
@@ -66,7 +66,7 @@
     </div>
 
     <!-- Employee Cards - Style maquette avec initiales -->
-    <h5 class="fw-semibold mb-3">Staff Directory</h5>
+    <h5 class="fw-semibold mb-3"> Annuaire des employés </h5>
     <div class="row g-4">
         @forelse($employees as $emp)
         <div class="col-md-4">
@@ -125,10 +125,10 @@
                         <span class="small">
                             @if($emp->statut == 1)
                                 <i class="fa-solid fa-circle text-success me-1" style="font-size: 8px;"></i>
-                                <span class="text-success">Active Today</span>
+                                <span class="text-success">Actif aujourd'hui</span>
                             @else
                                 <i class="fa-solid fa-circle text-secondary me-1" style="font-size: 8px;"></i>
-                                <span class="text-secondary">On Leave</span>
+                                <span class="text-secondary">En congé</span>
                             @endif
                         </span>
                         <div class="btn-group">
@@ -148,10 +148,10 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body text-center py-5">
                     <i class="fa-solid fa-users-slash fs-1 text-muted mb-3"></i>
-                    <h5>No employees found</h5>
-                    <p class="text-muted">Start by adding your first employee</p>
+                    <h5>Aucun personnel trouvé</h5>
+                    <p class="text-muted">Ajoutez votre premier employé pour commencer</p>
                     <a href="{{ route('users.create') }}" class="btn btn-primary">
-                        <i class="fa-solid fa-plus me-2"></i>Add Employee
+                        <i class="fa-solid fa-plus me-2"></i>AJOUTER UN EMPLOYÉ
                     </a>
                 </div>
             </div>

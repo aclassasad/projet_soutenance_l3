@@ -6,8 +6,8 @@
 <div class="container-fluid px-3 px-md-4">
     <!-- Header avec titre et description -->
     <div class="mb-4">
-        <h2 class="fw-bold mb-1">Inventory Management</h2>
-        <p class="text-muted">Manage your store's product inventory</p>
+        <h2 class="fw-bold mb-1">Gestion des stocks </h2>
+        <p class="text-muted"> Gérez l’inventaire des produits de votre magasin</p>
     </div>
 
     <!-- Metrics Cards - Responsive -->
@@ -16,7 +16,7 @@
             <div class="card border-0 shadow-sm h-100 hover-card">
                 <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
                     <div class="w-75 w-md-100 w-lg-75">
-                        <h6 class="text-muted small mb-1 mb-md-2">Total Products</h6>
+                        <h6 class="text-muted small mb-1 mb-md-2">Produicts Total</h6>
                         <h4 class="fw-bold mb-0 fs-5 fs-md-4">{{ $stats['total_produits'] }}</h4>
                     </div>
                     <div class="bg-primary bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
@@ -30,7 +30,7 @@
             <div class="card border-0 shadow-sm h-100 hover-card">
                 <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
                     <div class="w-75 w-md-100 w-lg-75">
-                        <h6 class="text-muted small mb-1 mb-md-2">Low Stock Items</h6>
+                        <h6 class="text-muted small mb-1 mb-md-2">Articles à faible stock</h6>
                         <h4 class="fw-bold mb-0 fs-5 fs-md-4">{{ $stats['produits_stock_baisse'] }}</h4>
                     </div>
                     <div class="bg-warning bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
@@ -44,7 +44,7 @@
             <div class="card border-0 shadow-sm h-100 hover-card">
                 <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
                     <div class="w-75 w-md-100 w-lg-75">
-                        <h6 class="text-muted small mb-1 mb-md-2">Out of Stock</h6>
+                        <h6 class="text-muted small mb-1 mb-md-2">Rupture de stock</h6>
                         <h4 class="fw-bold mb-0 fs-5 fs-md-4">{{ $stats['produits_stock_fini'] }}</h4>
                     </div>
                     <div class="bg-danger bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
@@ -58,7 +58,7 @@
             <div class="card border-0 shadow-sm h-100 hover-card">
                 <div class="card-body d-flex flex-row flex-md-column flex-lg-row justify-content-between align-items-center p-3 p-md-4">
                     <div class="w-75 w-md-100 w-lg-75">
-                        <h6 class="text-muted small mb-1 mb-md-2">Total Value</h6>
+                        <h6 class="text-muted small mb-1 mb-md-2"> Montant total</h6>
                         <h4 class="fw-bold mb-0 fs-5 fs-md-4">{{ number_format($stats['valeur_totale'], 0, ',', ' ') }} <small class="fs-6">FCFA</small></h4>
                     </div>
                     <div class="bg-success bg-opacity-10 p-2 p-md-3 rounded-circle ms-2 ms-md-0 ms-lg-2">
@@ -77,7 +77,7 @@
                 <input type="text" id="searchInput" class="form-control ps-5" style="height: 100%;" placeholder="Search by product name or SKU...">
             </div>
             <select id="categoryFilter" class="form-select w-100 w-sm-50 w-md-25">
-                <option value="">All Categories</option>
+                <option value="">Toutes les catégories </option>
                 @foreach($categories as $cat)
                     <option value="{{ $cat->id }}">{{ $cat->nom }}</option>
                 @endforeach
@@ -105,11 +105,11 @@
                     <thead class="table-light">
                         <tr>
                             <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">SKU</th>
-                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">PRODUCT NAME</th>
-                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small d-none d-md-table-cell">CATEGORY</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">NOM DU PRODUIT</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small d-none d-md-table-cell">CATEGORIE</th>
                             <th class="px-2 px-md-4 py-3 text-muted fw-semibold small text-end">STOCK</th>
-                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small text-end">PRICE</th>
-                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small d-none d-lg-table-cell">LOCATION</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small text-end">PRIX</th>
+                            <th class="px-2 px-md-4 py-3 text-muted fw-semibold small d-none d-lg-table-cell">DESTINATION</th>
                             <th class="px-2 px-md-4 py-3 text-muted fw-semibold small">STATUS</th>
                             <th class="px-2 px-md-4 py-3 text-muted fw-semibold small text-center">ACTIONS</th>
                         </tr>
