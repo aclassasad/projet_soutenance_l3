@@ -46,4 +46,11 @@ static final String baseUrl = dotenv.env['API_BASE_URL'] ?? "";
       throw Exception("Erreur lors de l’investigation de l’incident");
     }
   }
+  static Future<void> toggleMotionDetection(bool enabled) async {
+  // Appel API pour activer/désactiver la détection de mouvement
+}
+
+static Future<void> toggleAlarm(bool active) async {
+  // Appel API pour activer/désactiver l'alarme
+}
 }
