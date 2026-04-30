@@ -14,6 +14,8 @@ use App\Http\Controllers\VenteController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EquipementController;
+
 
 // ==========================
 // 🔹 Authentification
@@ -90,3 +92,13 @@ Route::middleware('auth:sanctum')->get('/dashboard', [DashboardController::class
 // 🔹 Vente d'un employé
 // ==========================
 Route::get('/employees/{id}/ventes', [EmployeeController::class, 'ventes']);
+
+
+
+// ==========================
+// 🔹 Equipements
+// ==========================
+
+
+
+Route::post('/equipements/update', [EquipementController::class, 'updateEtat']);

@@ -23,7 +23,7 @@
                     <form method="POST" action="{{ route('settings.update') }}" id="settingsForm">
                         @csrf
                         
-                        <!-- Langue -->
+                        <!-- Langue 
                         <div class="mb-4">
                             <label class="form-label fw-semibold">{{ __('settings.language') }}</label>
                             <div class="d-flex gap-4">
@@ -40,7 +40,7 @@
                                     </label>
                                 </div>
                             </div>
-                        </div>
+                        </div>    -->
 
                         <!-- Thème -->
                         <div class="mb-4">

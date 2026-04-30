@@ -106,17 +106,11 @@
                             <i class="fa-regular fa-envelope text-muted me-2" style="width: 20px;"></i>
                             <span class="small">{{ $emp->email }}</span>
                         </div>
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fa-regular fa-phone text-muted me-2" style="width: 20px;"></i>
-                            <span class="small">{{ $emp->telephone ?? '(555) ' . rand(100, 999) . '-' . rand(1000, 9999) }}</span>
-                        </div>
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fa-regular fa-clock text-muted me-2" style="width: 20px;"></i>
-                            <span class="small">{{ $emp->horaire ?? ($emp->role === 'gerant' ? 'Afternoon (12PM-8PM)' : 'Morning (8AM-4PM)') }}</span>
-                        </div>
+                        
+                        
                         <div class="d-flex align-items-center">
                             <i class="fa-regular fa-calendar text-muted me-2" style="width: 20px;"></i>
-                            <span class="small">Joined: {{ $emp->created_at ? $emp->created_at->format('d/m/Y') : now()->subMonths(rand(1, 12))->format('d/m/Y') }}</span>
+                            <span class="small">Membre depuis le: {{ $emp->created_at ? $emp->created_at->format('d/m/Y') : now()->subMonths(rand(1, 12))->format('d/m/Y') }}</span>
                         </div>
                     </div>
 

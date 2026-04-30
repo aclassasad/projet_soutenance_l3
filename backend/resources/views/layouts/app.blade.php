@@ -99,7 +99,7 @@
       </li>
       <li class="nav-item mb-3">
         <a class="nav-link text-white {{ request()->routeIs('employees') ? 'active' : '' }}" href="{{ route('employees') }}">
-          <i class="bi bi-people"></i> Employer
+          <i class="bi bi-people"></i> Employes
         </a>
       </li>
     </ul>

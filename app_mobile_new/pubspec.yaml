@@ -36,6 +36,7 @@ flutter:
     - assets/images/logo.jpeg
     - .env.local
     - .env.tel
+    - .env.telO
 
   fonts:
     - family: NotoSans

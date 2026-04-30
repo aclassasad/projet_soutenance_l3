@@ -66,7 +66,6 @@
     </div>
 
     <div class="info">
-        <p><strong>Adresse :</strong> {{ config('app.address') ?? 'N/A' }}</p>
         <p><strong>Date :</strong> {{ $vente->date_vente }}</p>
         <p><strong>Caissier :</strong> {{ $vente->user->name ?? 'N/A' }}</p>
         <p><strong>Numéro de vente :</strong> #{{ $vente->id }}</p>
@@ -101,7 +100,7 @@
 
     <div class="footer">
         Merci pour votre achat ! <br>
-        <small>Ce reçu est généré automatiquement par SecureStore.</small>
+        <small>Ce reçu est généré automatiquement par SecureStorePro.</small>
     </div>
 </body>
 </html>
