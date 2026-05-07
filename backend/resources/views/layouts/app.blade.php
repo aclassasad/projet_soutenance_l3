@@ -87,11 +87,15 @@
           <i class="bi bi-box-seam"></i> Inventaire
         </a>
       </li>
+          <!-- Sécurité 
+
       <li class="nav-item mb-3">
         <a class="nav-link text-white {{ request()->routeIs('security') ? 'active' : '' }}" href="{{ route('security') }}">
           <i class="bi bi-shield-lock"></i> Sécurité
         </a>
       </li>
+
+      -->
       <li class="nav-item mb-3">
         <a class="nav-link text-white {{ request()->routeIs('sales') ? 'active' : '' }}" href="{{ route('sales') }}">
           <i class="bi bi-cart"></i> Ventes

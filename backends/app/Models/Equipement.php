@@ -17,10 +17,15 @@ class Equipement extends Model
         'action',      // 1 = action en cours, 0 = aucune
         'nom',
         'description',
+        'user_id',
     ];
 
     protected $casts = [
         'etat' => 'boolean',
         'action' => 'boolean',
     ];
+     public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -11,7 +11,6 @@ class SecurityController extends Controller
     public function stats()
     {
         return response()->json([
-            'cameras_online' => 5, // Exemple statique, à remplacer par ton vrai monitoring
             'active_incidents' => DB::table('incidents')->where('status', 'active')->count(),
             'recording' => true,
             'system_status' => 'OK',

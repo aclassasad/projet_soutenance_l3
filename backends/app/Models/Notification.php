@@ -12,5 +12,6 @@ class Notification extends Model
         'title',
         'message',
         'type',
+         'read',
     ];
 }

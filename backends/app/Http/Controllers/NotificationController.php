@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use App\Events\NewNotificationEvent;
 
 class NotificationController extends Controller
 {
@@ -23,6 +24,9 @@ class NotificationController extends Controller
         ]);
 
         $notif = Notification::create($validated);
+
+        broadcast(new NewNotificationEvent($notif))->toOthers();
+
         return response()->json($notif, 201);
     }
 
@@ -31,5 +35,23 @@ class NotificationController extends Controller
     {
         Notification::truncate();
         return response()->json(['message' => 'Toutes les notifications ont été effacées'], 200);
+    }
+
+    // 🔹 Marquer une notification comme lue
+    public function markAsRead($id)
+    {
+        $notif = Notification::findOrFail($id);
+        $notif->update(['read' => true]);
+
+        return response()->json(['message' => 'Notification marquée comme lue'], 200);
+    }
+
+    // 🔹 Supprimer une notification spécifique
+    public function destroy($id)
+    {
+        $notif = Notification::findOrFail($id);
+        $notif->delete();
+
+        return response()->json(['message' => 'Notification supprimée'], 200);
     }
 }

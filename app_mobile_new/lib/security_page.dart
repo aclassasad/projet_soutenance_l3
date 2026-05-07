@@ -3,6 +3,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'security_service.dart';
 import 'loading_widget.dart';
 import 'theme_provider.dart';
+import 'dart:async';
+
 
 class SecurityPage extends StatefulWidget {
   const SecurityPage({super.key});
@@ -11,19 +13,51 @@ class SecurityPage extends StatefulWidget {
   State<SecurityPage> createState() => _SecurityPageState();
 }
 
+String formatDate(String? dateString) {
+  if (dateString == null) return "N/A";
+  try {
+    final parsedDate = DateTime.parse(dateString); // lit la date ISO
+    final localDate = parsedDate.toLocal();        // convertit en heure locale du téléphone
+    return "${localDate.day.toString().padLeft(2, '0')}/"
+           "${localDate.month.toString().padLeft(2, '0')}/"
+           "${localDate.year} "
+           "${localDate.hour.toString().padLeft(2, '0')}:"
+           "${localDate.minute.toString().padLeft(2, '0')}";
+  } catch (e) {
+    return dateString;
+  }
+}
+
+
+
 class _SecurityPageState extends State<SecurityPage> {
   Map<String, dynamic>? stats;
   List<Map<String, dynamic>> incidents = [];
-  List<Map<String, dynamic>> incidentStats = [];
+Map<String, dynamic> incidentStats = {};
   bool loading = true;
+  
+  // États locaux pour la sécurité
+  bool _motionDetectionEnabled = true;
+  bool _alarmActive = false;
+  bool _isTogglingMotion = false;
+  bool _isTogglingAlarm = false;
 
   @override
-  void initState() {
-    super.initState();
-    _loadSecurityData();
-    // Écouter les changements de thème
-    ThemeProvider.instance.addListener(_onThemeChanged);
-  }
+void initState() {
+  super.initState();
+  _loadSecurityData();
+  ThemeProvider.instance.addListener(_onThemeChanged);
+
+  // 🔹 Rafraîchissement automatique toutes les 5 secondes
+  Timer.periodic(Duration(seconds: 5), (timer) {
+    if (mounted) {
+      _loadSecurityData();
+    } else {
+      timer.cancel();
+    }
+  });
+}
+
 
   @override
   void dispose() {
@@ -37,33 +71,38 @@ class _SecurityPageState extends State<SecurityPage> {
     }
   }
 
-  Future<void> _loadSecurityData() async {
-    try {
-      final statsData = await SecurityService.getSecurityStats();
-      final incidentsData = await SecurityService.getIncidents();
-      final incidentStatsData = await SecurityService.getIncidentStats();
-      setState(() {
-        stats = statsData;
-        incidents = incidentsData;
-        incidentStats = incidentStatsData;
-        loading = false;
-      });
-    } catch (e) {
-      setState(() => loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Erreur: $e"),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
+ Future<void> _loadSecurityData() async {
+  try {
+    final statsData = await SecurityService.getSecurityStats();
+    final incidentsData = await SecurityService.getIncidents();
+    final incidentStatsData = await SecurityService.getIncidentStats();
+    final alarmStatusData = await SecurityService.getAlarmStatus(); // 🔹 nouveau
+   final etat = alarmStatusData['etat'];
+print("DEBUG getAlarmStatus: ${alarmStatusData['etat']} (${alarmStatusData['etat'].runtimeType})");
+setState(() {
+  stats = statsData;
+  incidents = incidentsData;
+  incidentStats = incidentStatsData;
 
-  String _getRecordingText() {
-    return stats?['recording'] == true ? "Oui" : "Non";
+  // 🔹 Normalisation robuste
+_alarmActive = alarmStatusData['etat'];
+
+  loading = false;
+});
+
+  }  catch (e) {
+    setState(() => loading = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Erreur: $e"),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
+
 
   String _getSystemStatus() {
     final status = stats?['system_status']?.toString() ?? "Inconnu";
@@ -99,6 +138,66 @@ class _SecurityPageState extends State<SecurityPage> {
     }
   }
 
+  Future<void> _toggleMotionDetection() async {
+    setState(() => _isTogglingMotion = true);
+    try {
+      final newState = !_motionDetectionEnabled;
+      await SecurityService.toggleMotionDetection(newState);
+      setState(() => _motionDetectionEnabled = newState);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_motionDetectionEnabled 
+              ? "Détection de mouvement activée" 
+              : "Détection de mouvement désactivée"),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: const Color(0xFF4361EE),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur: $e"),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isTogglingMotion = false);
+    }
+  }
+
+  Future<void> _toggleAlarm() async {
+    setState(() => _isTogglingAlarm = true);
+    try {
+      final newState = !_alarmActive;
+      await SecurityService.toggleAlarm(newState);
+      setState(() => _alarmActive = newState);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_alarmActive 
+              ? "Alarme activée" 
+              : "Alarme désactivée"),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: _alarmActive ? Colors.red : const Color(0xFF4361EE),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur: $e"),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() => _isTogglingAlarm = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = ThemeProvider.instance.themeMode == 'dark';
@@ -110,7 +209,6 @@ class _SecurityPageState extends State<SecurityPage> {
       );
     }
 
-    final recordingText = _getRecordingText();
     final systemStatus = _getSystemStatus();
     final statusColor = _getStatusColor();
 
@@ -178,17 +276,19 @@ class _SecurityPageState extends State<SecurityPage> {
             ),
             const SizedBox(height: 12),
 
-            // Cartes statistiques - Disposition verticale
-            _buildStatCard(
-              "Caméras en ligne",
-              stats?['cameras_online']?.toString() ?? "0",
-              stats?['cameras_total']?.toString() ?? "8",
-              const Color(0xFF4361EE),
-              Icons.videocam,
-              isDarkMode,
-            ),
+            // Carte État du système
+            _buildSystemStatusCard(systemStatus, statusColor, isDarkMode),
             const SizedBox(height: 12),
 
+            // Carte Détection de mouvement
+            _buildMotionDetectionCard(isDarkMode),
+            const SizedBox(height: 12),
+
+            // Carte Alarme
+            _buildAlarmCard(isDarkMode),
+            const SizedBox(height: 12),
+
+            // Carte Incidents actifs
             _buildStatCard(
               "Incidents actifs",
               stats?['active_incidents']?.toString() ?? "0",
@@ -198,57 +298,6 @@ class _SecurityPageState extends State<SecurityPage> {
               isDarkMode,
             ),
             const SizedBox(height: 12),
-
-            _buildStatCard(
-              "Enregistrement",
-              recordingText,
-              stats?['recording'] == true ? "Actif" : "Inactif",
-              const Color(0xFFF59E0B),
-              Icons.fiber_manual_record,
-              isDarkMode,
-            ),
-            const SizedBox(height: 12),
-
-            _buildStatCard(
-              "État du système",
-              systemStatus,
-              "Statut général",
-              statusColor,
-              Icons.security,
-              isDarkMode,
-            ),
-            const SizedBox(height: 12),
-
-            const SizedBox(height: 24),
-
-            // Section flux caméra
-            Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: [
-                  Container(
-                    width: 4,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4361EE),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Flux vidéo",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            _buildCameraFeedCard(isDarkMode),
 
             const SizedBox(height: 24),
 
@@ -282,37 +331,218 @@ class _SecurityPageState extends State<SecurityPage> {
             incidents.isEmpty
                 ? _buildEmptyIncidentsState(isDarkMode)
                 : _buildIncidentsList(isDarkMode),
+          ],
+        ),
+      ),
+    );
+  }
 
-            const SizedBox(height: 24),
-
-            // Section types d'incidents
-            Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: Row(
+  Widget _buildSystemStatusCard(String status, Color statusColor, bool isDarkMode) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 4,
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4361EE),
-                      borderRadius: BorderRadius.circular(2),
+                  Text(
+                    "État du système",
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(height: 6),
                   Text(
-                    "Types d'incidents",
+                    status,
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: statusColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "Statut général",
+                      style: TextStyle(
+                        color: statusColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(width: 12),
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [statusColor, statusColor.withOpacity(0.7)],
+                ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(Icons.security, color: Colors.white, size: 26),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-            _buildIncidentChartCard(isDarkMode),
+  Widget _buildMotionDetectionCard(bool isDarkMode) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Détection de mouvement",
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: _motionDetectionEnabled ? Colors.green : Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _motionDetectionEnabled ? "Activé" : "Désactivé",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: _motionDetectionEnabled ? Colors.green : Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: _motionDetectionEnabled,
+              onChanged: _isTogglingMotion ? null : (_) => _toggleMotionDetection(),
+              activeColor: const Color(0xFF4361EE),
+              activeTrackColor: const Color(0xFF4361EE).withOpacity(0.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAlarmCard(bool isDarkMode) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Alarme",
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.notifications_active,
+                        size: 16,
+                        color: _alarmActive ? Colors.red : Colors.grey,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _alarmActive ? "Active (sonne)" : "Inactive",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: _alarmActive ? Colors.red : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: _alarmActive,
+              onChanged: _isTogglingAlarm ? null : (_) => _toggleAlarm(),
+              activeColor: Colors.red,
+              activeTrackColor: Colors.red.withOpacity(0.5),
+            ),
           ],
         ),
       ),
@@ -398,130 +628,6 @@ class _SecurityPageState extends State<SecurityPage> {
     );
   }
 
-  Widget _buildCameraFeedCard(bool isDarkMode) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 1,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Entrée principale - Porte avant",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Text(
-                        "EN DIRECT",
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.black87,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isDarkMode ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-                  width: 1,
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.videocam_off,
-                    size: 48,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "[Flux vidéo en direct]",
-                    style: TextStyle(
-                      color: Colors.grey[500],
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildCameraButton(Icons.play_arrow, "Lecture", Colors.green),
-                const SizedBox(width: 8),
-                _buildCameraButton(Icons.pause, "Pause", Colors.orange),
-                const SizedBox(width: 8),
-                _buildCameraButton(Icons.fullscreen, "Plein écran", const Color(0xFF4361EE)),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCameraButton(IconData icon, String label, Color color) {
-    return ElevatedButton.icon(
-      onPressed: () {},
-      icon: Icon(icon, size: 16),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
-    );
-  }
-
   Widget _buildIncidentsList(bool isDarkMode) {
     return ListView.builder(
       shrinkWrap: true,
@@ -551,105 +657,188 @@ class _SecurityPageState extends State<SecurityPage> {
               ),
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: severityColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        i['description'] ?? "Sans description",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+          child: InkWell(
+            onTap: () => _showIncidentDetails(i, isDarkMode),
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: severityColor,
+                          shape: BoxShape.circle,
                         ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: severityColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          i['description'] ?? "Sans description",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                          ),
+                        ),
                       ),
-                      child: Text(
-                        severityText,
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: severityColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          severityText,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: severityColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                     
+                      const SizedBox(width: 16),
+                      Icon(Icons.calendar_today_outlined, size: 12, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
+                      const SizedBox(width: 4),
+                      Text(
+  formatDate(i['updated_at']),
+  style: TextStyle(
+    fontSize: 11,
+    color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
+),
+
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        "Appuyez pour plus de détails >",
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: severityColor,
+                          color: const Color(0xFF4361EE),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.location_on_outlined, size: 12, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
-                    const SizedBox(width: 4),
-                    Text(
-                      i['location'] ?? "N/A",
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Icon(Icons.calendar_today_outlined, size: 12, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
-                    const SizedBox(width: 4),
-                    Text(
-                      i['date'] ?? "N/A",
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await SecurityService.investigateIncident(i['id'] ?? 0);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Incident ${i['id'] ?? "?"} en investigation"),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          backgroundColor: const Color(0xFF4361EE),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: severityColor,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    ),
-                    child: const Text("Enquêter"),
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
       },
+    );
+  }
+
+  void _showIncidentDetails(Map<String, dynamic> incident, bool isDarkMode) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Détails de l'incident",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close, color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 8),
+            _buildDetailRow("Description", incident['description'] ?? "Non spécifiée", isDarkMode),
+_buildDetailRow(
+  "Date",
+  formatDate(incident['updated_at']),
+  isDarkMode,
+),
+           _buildDetailRow("Sévérité", _getSeverityText(incident['severity'] ?? "medium"), isDarkMode),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await SecurityService.investigateIncident(incident['id'] ?? 0);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Incident ${incident['id'] ?? "?"} en investigation"),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      backgroundColor: const Color(0xFF4361EE),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4361EE),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text("Enquêter"),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, bool isDarkMode) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              "$label :",
+              style: TextStyle(color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B), fontSize: 13),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: isDarkMode ? Colors.white : const Color(0xFF1E293B),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -686,150 +875,6 @@ class _SecurityPageState extends State<SecurityPage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildIncidentChartCard(bool isDarkMode) {
-    if (incidentStats.isEmpty) {
-      return Container(
-        height: 200,
-        decoration: BoxDecoration(
-          color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Center(
-          child: Text(
-            "Aucune donnée disponible",
-            style: TextStyle(
-              color: isDarkMode ? Colors.grey[500] : const Color(0xFF94A3B8),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: isDarkMode ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 1,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 220,
-              child: BarChart(
-                BarChartData(
-                  gridData: FlGridData(
-                    show: true,
-                    drawHorizontalLine: true,
-                    drawVerticalLine: false,
-                    getDrawingHorizontalLine: (value) {
-                      return FlLine(
-                        color: isDarkMode ? const Color(0xFF334155) : Colors.grey.shade200,
-                        strokeWidth: 1,
-                      );
-                    },
-                  ),
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 40,
-                        getTitlesWidget: (value, meta) {
-                          return Text(
-                            value.toInt().toString(),
-                            style: TextStyle(
-                              color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
-                              fontSize: 10,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          final index = value.toInt();
-                          if (index >= 0 && index < incidentStats.length) {
-                            final type = incidentStats[index]['type'] ?? "";
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Text(
-                                type.length > 8 ? type.substring(0, 8) : type,
-                                style: TextStyle(
-                                  color: isDarkMode ? Colors.grey[400] : const Color(0xFF64748B),
-                                  fontSize: 10,
-                                ),
-                              ),
-                            );
-                          }
-                          return const Text('');
-                        },
-                      ),
-                    ),
-                    rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  ),
-                  borderData: FlBorderData(show: false),
-                  barGroups: List.generate(
-                    incidentStats.length,
-                    (i) => BarChartGroupData(
-                      x: i,
-                      barRods: [
-                        BarChartRodData(
-                          toY: (incidentStats[i]['count'] ?? 0).toDouble(),
-                          color: const Color(0xFFEF4444),
-                          width: 30,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFEF4444).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFEF4444),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    "Nombre d'incidents par type",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -82,8 +82,10 @@ Route::post('/security/incidents/{id}/investigate', [SecurityController::class, 
 // ==========================
 Route::get('/notifications', [NotificationController::class, 'index']);
 Route::post('/notifications', [NotificationController::class, 'store']);
-Route::delete('/notifications/clear', [NotificationController::class, 'clear']);
+Route::post('/notifications/clear', [NotificationController::class, 'clear']);
 
+Route::put('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
 
 
 Route::middleware('auth:sanctum')->get('/dashboard', [DashboardController::class, 'stats']);
@@ -101,4 +103,27 @@ Route::get('/employees/{id}/ventes', [EmployeeController::class, 'ventes']);
 
 
 
-Route::post('/equipements/update', [EquipementController::class, 'updateEtat']);
+//Route::get('/equipements/update', [EquipementController::class, 'updateEtat']);
+
+
+Route::match(['get','post'], '/equipements/update', [EquipementController::class, 'updateEtat']);
+Route::get('/equipements/incidents', [EquipementController::class, 'getIncidents']);
+Route::get('/equipements/stats', [EquipementController::class, 'getSecurityStats']);
+Route::get('/equipements/incident-stats', [EquipementController::class, 'getIncidentStats']);
+Route::post('/equipements/incidents/{id}/investigate', [EquipementController::class, 'investigateIncident']);
+Route::post('/equipements/toggle-motion', [EquipementController::class, 'toggleMotionDetection']);
+Route::post('/equipements/toggle-alarm', [EquipementController::class, 'toggleAlarm']);
+
+
+Route::get('/equipements/update/{mac}', [EquipementController::class, 'updateEtatGet']);
+
+
+
+Route::get('/equipements/alarme/status', function () {
+    $alarme = \App\Models\Equipement::where('nom', 'Alarme')->first();
+    return response()->json([
+        'etat' => $alarme ? $alarme->etat : 0,
+        'action' => $alarme ? $alarme->action : 0,
+        'description' => $alarme ? $alarme->description : 'Pas d’alarme'
+    ]);
+});

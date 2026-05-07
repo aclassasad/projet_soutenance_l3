@@ -141,7 +141,7 @@ class _DashboardPageState extends State<DashboardPage> {
             _metricCard(
               "Chiffre d'affaires",
               "${_formatNumber(stats?['total_revenu'] ?? 0)} FCFA",
-              "+12.5%",
+              "",
               Icons.attach_money,
               const Color(0xFF10B981),
               isDarkMode,
