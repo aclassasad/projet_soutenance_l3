@@ -1,12 +1,23 @@
-# Dockerfile pour le site web Laravel (Blade/pages)
+# Image de base avec PHP 8.2 + Nginx
 FROM webdevops/php-nginx:8.2
 
-WORKDIR /var/www/html
+# Définir le répertoire de travail
+WORKDIR /app
 
-COPY . .
+# Copier tout le projet Laravel
+COPY . /app
 
-RUN composer install --no-dev --optimize-autoloader
-RUN php artisan config:cache && php artisan route:cache
+# Installer Composer et les dépendances Laravel
+RUN composer install --no-dev --optimize-autoloader \
+    && php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
 
-# Expose le port 80 pour Render
+# Définir la racine publique pour Nginx
+ENV WEB_DOCUMENT_ROOT=/app/public
+
+# Exposer le port 80
 EXPOSE 80
+
+# Commande de démarrage (Nginx + PHP-FPM sont déjà gérés par l'image)
+CMD ["supervisord"]
